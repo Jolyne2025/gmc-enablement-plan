@@ -58,7 +58,7 @@
   <tr><td><a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a></td><td><strong>GMC 域名验证（含 EP 域名验证，2026-08-20 合并）</strong>——第一期 4 域名（wlw.de + europages.it + europages.es + europages.fr），各账号验证各自域名；GMC 要求 feed 中 <code>link</code> 指向的域名必须在<strong>该域名自己的账号</strong>内完成“验证 + 声明”（verify and claim website）：每个 EP 域名开独立账号、各自验证各自域名；EP 域名按公司注册国归属（<strong>国家站模式，2026-08-20 确认；ep.fr=法国公司品 ~124k / ep.es=西班牙 ~77k / ep.it=意大利 ~51k，量级见 4.1</strong>）；未验证 → link 报 mismatched domain、商品不收录。链路：先确认 EP 自有 PDP URL 模式（见 3.C）→ 各账号完成域名验证 → 各域名品即可上传；其余 EP 国家域名（de ~195k / co.uk ~69k / nl ~39k 等 ≈ 490k）后续阶段再开账号</td><td><span class="badge yellow">待确认</span></td></tr>
   <tr><td><a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a></td><td>GMC Feed 配置基础建设</td><td><span class="badge yellow">待确认</span></td></tr>
   <tr><td>PDP URL 构造</td><td>wlw.de 侧 slug_id → URL 映射 <strong>已验证</strong>（2026-08-20 实测 200）</td><td><span class="badge green">✅ 已验证</span></td></tr>
-  <tr><td>PDP 前端展示价格</td><td>官方 <a href="https://support.google.com/merchants/answer/4752265" target="_blank">Landing page requirements</a> 硬性要求（<a href="https://support.google.com/merchants/answer/4752265" target="_blank">4752265</a> “clearly show the product price”）；PDP UI 显示 <strong>min 主价格</strong>（或阶梯表，min 最显眼），与 feed/JSON-LD 一致；biz-seo-sdk JSON-LD 已输出 min 无需改，仅 UI 渲染</td><td><span class="badge red">新增依赖</span> 产品侧</td></tr>
+    <tr><td>PDP 前端展示价格</td><td>官方 <a href="https://support.google.com/merchants/answer/4752265" target="_blank">Landing page requirements</a> 硬性要求（<a href="https://support.google.com/merchants/answer/4752265" target="_blank">4752265</a> “clearly show the product price”）——<strong>2026-08-20 复核：wlw 线上已满足</strong>，有价格品 PDP UI 主价格区已展示（“ab 119 €”格式，range 品显示 min-max 首位），与 feed/JSON-LD 三方一致，<strong>无需新增开发</strong>；⚠️ 非 EUR 币种（CHF/GBP/SEK 等 ~25.3k，4.4%）UI 按 EUR 换算显示 → feed 币种策略需对齐（见 2.7 ④ / 2.9）</td><td><span class="badge green">✅ 已满足</span>（复核 2026-08-20）</td></tr>
     <tr><td>Feed 更新机制</td><td>增量更新 / 全量刷新的方案设计</td><td><span class="badge yellow">需技术设计</span></td></tr>
 </table>
 
@@ -165,7 +165,7 @@
     <tr><td>公司 slug_id</td><td>companies.companies.slug_id</td><td class="num">100%</td><td>如 280744（Mahr GmbH）</td></tr>
     <tr><td>公司 slug</td><td>slugify(公司名)（小写/变音符转写/标点转连字符）</td><td class="num">11,840 家</td><td>如 Mahr GmbH → mahr-gmbh；<strong>容错：错误 slug + 正确 id 实测 HTTP 200</strong></td></tr>
     <tr><td>产品 slug_id</td><td>supplier_offers.offers.slug_id</td><td class="num">100%（3,495,171 全覆盖）</td><td>如 35874570</td></tr>
-    <tr><td>产品 slug</td><td>supplier_offers.revisions.snapshot_slug（最新版）</td><td class="num">39%</td><td>缺失 61% → <strong><a href="https://visable.atlassian.net/browse/ARISE-1239" target="_blank">ARISE-1239</a> 已修复</strong>（7/16 上线）：VCG 读路径 fallback 返回 slug_id，URL 降级为 <code>/produkte/{slug_id}</code></td></tr>
+    <tr><td>产品 slug</td><td>supplier_offers.revisions.snapshot_slug（最新版）</td><td class="num">39%</td><td>缺失 61% → <strong><a href="https://visable.atlassian.net/browse/ARISE-1239" target="_blank">ARISE-1239</a> 已修复</strong>（7/16 上线）：VCG 读路径 fallback 返回 slug_id，产品 URL 段降级为 <code>/produkte/{slug_id}</code>（仍为 <code>/firma/{公司段}/…</code> 详情页模式，非短路径）</td></tr>
   </table>
 
   <h3>URL 可访问性实测（curl / WebFetch，2026-08-20）</h3>
@@ -181,24 +181,25 @@
 </div>
 
 <!-- ==================== 2.7 线上对照验证 ==================== -->
-<h3>2.7 线上对照验证：PDP 页面不显示价格，但 JSON-LD 带价格（2026-08-20）</h3>
+<h3>2.7 线上对照验证：有价格品 UI + JSON-LD 双展示，与数据库三方一致（2026-08-20 复核修正）</h3>
 
 <div class="card">
-  <p><strong>背景：</strong>线上随机抽查 PDP 页面看不到价格，引发对“带价品 1,258,017”数据真实性的质疑。经数据库 ↔ 线上逐条对照，<strong>数据完全真实一致</strong>，看不到价格是 wlw 页面设计所致：</p>
+  <p><strong>背景（2026-08-20 复核修正）：</strong>此前抽查误用短路径 <code>/produkte/{slug_id}</code>（实为<strong>商品列表页</strong>，非 PDP 详情页），得出“UI 不显示价格”的错误结论。经线上对照复核（用户指正 + curl 原始 HTML 逐一验证，改用完整详情页模式 <code>/firma/{公司slug}-{slug_id}/produkte/{产品slug}-{slug_id}</code>），<strong>有价格品 UI 正常展示价格</strong>，与数据库 / JSON-LD 三方一致：</p>
 
   <table>
     <tr><th>对照项</th><th>数据库 (Redshift)</th><th>线上页面 (wlw.de)</th><th>结论</th></tr>
-    <tr><td>PMT Glasabfälle（用户抽查）<br><a href="https://www.wlw.de/de/produkte/36354509" target="_blank"><code>/produkte/glasabfaelle-...-36354509</code></a></td><td>data_price_min = <strong>NULL</strong></td><td>页面无价格（UI 与 JSON-LD 均无）</td><td><span class="badge green">一致</span> 该产品属于 64% 无价格群体；随机抽查命中无价格概率 64%</td></tr>
-    <tr><td>JAKO Duschvorhangstange（随机有价品）<br><a href="https://www.wlw.de/de/produkte/38496079" target="_blank"><code>/produkte/38496079</code></a></td><td>data_price_min = <strong>119 EUR</strong></td><td>UI 不显示价格；<strong>JSON-LD Product schema 含 <code>offers.price=“119”, priceCurrency=“EUR”, availability=InStock, sku=38496079</code></strong></td><td><span class="badge green">一致</span> 价格 119 = 119，字段全部对账</td></tr>
-    <tr><td>Mahr Weißlichtinterferometer（Jira 工单样例）<br><a href="https://www.wlw.de/de/produkte/35874570" target="_blank"><code>/produkte/35874570</code></a></td><td>data_price_min = <strong>NULL</strong></td><td>页面无价格；无 JSON-LD offers（但 NUXT payload 保留 price 字段定义）</td><td><span class="badge green">一致</span></td></tr>
+    <tr><td>PMT Glasabfälle（用户抽查）<br><a href="https://www.wlw.de/de/firma/pmt-produkt-marketing-technologietransfer-gmbh-22324717/produkte/36354509" target="_blank"><code>/firma/pmt-...-22324717/produkte/36354509</code></a></td><td>data_price_min = <strong>NULL</strong></td><td>页面无价格（UI 无主价格区；JSON-LD 无 offers；页面其他 € 均为推荐产品）</td><td><span class="badge green">一致</span> 该产品属于 64% 无价格群体；随机抽查命中无价格概率 64%</td></tr>
+    <tr><td>JAKO Duschvorhangstange（随机有价品）<br><a href="https://www.wlw.de/de/firma/jako-design-in-edelstahl-inh-sarah-wagner-20026753/produkte/38496079" target="_blank"><code>/firma/jako-design-...-20026753/produkte/38496079</code></a></td><td>data_price_min = <strong>119 EUR</strong></td><td><strong>UI 主价格区显示 “ab 119 €”</strong>（<code>data-test="product-price"</code>，NUXT payload 同 119 EUR）；<strong>JSON-LD Product schema 含 <code>offers.price=“119”, priceCurrency=“EUR”, availability=InStock, sku=38496079</code></strong></td><td><span class="badge green">一致</span> UI / JSON-LD / 数据库三方价格 119 = 119，字段全部对账</td></tr>
+    <tr><td>Mahr Weißlichtinterferometer（Jira 工单样例）<br><a href="https://www.wlw.de/de/firma/mahr-gmbh-280744/produkte/weisslichtinterferometer-mit-ica-technologie-35874570" target="_blank"><code>/firma/mahr-gmbh-280744/produkte/...-35874570</code></a></td><td>data_price_min = <strong>NULL</strong></td><td>页面无价格；无 JSON-LD offers（页面其他 € 均为推荐产品）</td><td><span class="badge green">一致</span></td></tr>
+    <tr><td>Something Different Wholesale（随机有价品）<br><a href="https://www.wlw.de/de/firma/something-different-wholesale-22308445/produkte/37346486" target="_blank"><code>/firma/something-different-...-22308445/produkte/37346486</code></a></td><td>data_price_min = <strong>2.08 GBP</strong></td><td><strong>UI 主价格区显示 “2,43 €”</strong>（GBP → EUR 汇率换算展示，EUR 品无此现象）；JSON-LD offers.price=2.08 + priceCurrency=GBP（原币）</td><td><span class="badge yellow">⚠️ 币种不一致</span> UI 展示 EUR 换算价，与 JSON-LD/数据库（GBP 原币）不同 → feed 原币提交会 mismatch（见结论 ④）</td></tr>
   </table>
 
   <p><strong>结论：</strong></p>
   <ul>
-    <li><strong>数据层价格真实：</strong>36% 带价品占比成立（2.5 节已随机抽样 30 条验证）；随机线上找产品看不到价格是常态——64% 无价格 + 有价格也不在 UI 展示</li>
-    <li><strong>wlw PDP 页面不渲染价格（UI），但输出 JSON-LD 结构化价格：</strong>有价格品 → <code>Product.offers.price</code> 输出且与数据库一致；无价格品 → 不输出 offers。这是 SEO 结构化数据项目（biz-seo-sdk）的成果，对 GMC 是重大利好</li>
-    <li><strong>GMC 影响：</strong>① 落地页结构化价格与 feed 价格一致 → <strong>price mismatch disapproval 风险极低</strong>；② 落地页 availability 也输出 InStock，与 feed 统一 in_stock 方案吻合；③ ⚠️ 用户肉眼看不到价格，Shopping 点击后体验打折，可能影响转化（见风险清单）</li>
-    <li><strong>审核合规性结论（页面无价格/库存是否拒登）：</strong>分两层——① <strong>feed 层</strong>：price / availability 为必填，缺失则商品不收录（我们已提供，达标）；② <strong>落地页层</strong>：mismatch 仅在“页面显示的状态与 feed 不一致”时触发（页面不显示 → 不构成 mismatch）；<strong>但 Google 官方 Landing page requirements（<a href="https://support.google.com/merchants/answer/4752265" target="_blank">4752265</a>）明确要求 “clearly show the product price on the landing page”</strong>——PDP UI 不显示价格属于落地页展示要求的合规缺口，虽不构成 mismatch 拒登，但叠加询价制“不可直接购买”存在无法使用 GMC 的实质风险（详见 2.9）。本页面 JSON-LD 输出价格与 feed 一致，是爬虫验证层面的加分项，但<strong>不能替代 UI 展示</strong>。</li>
+    <li><strong>数据层价格真实：</strong>36% 带价品占比成立（2.5 节已随机抽样 30 条验证）；线上随机找产品看不到价格是常态——64% 无价格品（页面确认无价格），有价格品则在 UI 正常展示（见 ②）</li>
+    <li><strong>复核修正（2026-08-20）：wlw PDP 有价格品 UI 正常展示价格，JSON-LD 同步输出，三方一致：</strong>有价格品 → UI 主价格区（<code>data-test="product-price"</code>）显示 “ab 119 €” / “8.212,50 €” / range 品 “90,45 - 166,84 €”（min 在首位最显眼），同时 <code>Product.offers.price</code> 输出且与数据库一致（119=119、8212.5=8.212,50…）；无价格品 → UI 无主价格区、JSON-LD 无 offers（页面其他 € 均为推荐产品）。<strong>此前“UI 不显示价格”结论错误</strong>——源于抽查误用短路径 <code>/produkte/{slug_id}</code>（商品列表页），正确详情页模式为 <code>/firma/{公司slug}-{slug_id}/produkte/{产品slug}-{slug_id}</code></li>
+    <li><strong>GMC 影响：</strong>① 落地页 UI 展示价格 + 结构化价格均与 feed 一致 → <strong>price mismatch disapproval 风险极低</strong>；② 落地页 availability 输出 InStock，与 feed 统一 in_stock 方案吻合；③ <strong>官方 Landing page requirements “clearly show the product price” 已满足</strong>（UI 展示 “ab min €”），此前的合规缺口消除（见 2.9）；④ ⚠️ <strong>新风险：非 EUR 币种 UI 按 EUR 换算展示</strong>（见 ⑤）</li>
+    <li><strong>⚠️ 非 EUR 币种换算风险（2026-08-20 新发现）：</strong>wlw 带价品中 EUR 545,964（95.6%），非 EUR ≈ 25,344（4.4%，CHF 21,055 + GBP 3,803 + SEK 413 等）——UI 主价格区按汇率换算成 EUR 显示（实测 2.08 GBP → “2,43 €”），而 JSON-LD / 数据库为原币种 → <strong>feed 按原币提交：落地页 UI 金额/币种与 feed 不一致 → price mismatch</strong>；feed 按 EUR 换算提交：与 JSON-LD 原币不符（爬虫校验风险）。需技术确认 wlw 前端换算汇率与算法，决定非 EUR 品策略（见 2.9 行动）</li>
     <li><strong>availability 审核结论（2026-08-20 补充）：</strong>① <strong>会被审核</strong>——feed 层必填（已达标）+ 落地页层一致性检查：页面显示的实际库存状态与 feed 矛盾（页面“可加购”但 feed 标 out of stock，或页面“售罄”但 feed 标 in stock）→ mismatch disapproval（官方 Inaccurate availability status 文档 <a href="https://support.google.com/merchants/answer/9773127" target="_blank">9773127</a> 专项处理）；页面<strong>不显示</strong>库存状态 → 不构成 mismatch（与 price 同逻辑）；② <strong>UI 非硬性</strong>——Landing page requirements 只硬性要求价格 “clearly show”，未要求 UI 显示“有货”状态；但 UI 一旦显示任何库存状态（标签/按钮态），必须与 feed 一致，否则 mismatch；③ <strong><a href="https://www.seroundtable.com/google-merchant-center-out-of-stock-41100.html" target="_blank">2026-03-26 Google 更新 Landing page requirements</a></strong>（SERoundtable 报道）：“products can successfully be added to a cart and delivered to a customer”；“out of stock 商品落地页 Buy 按钮必须置灰”（隐藏/可点击均不允许）——对 wlw 询价制（无 Buy 按钮）强化了“不可直接购买”的实质风险（与 2.9 结论互相印证）；④ <strong>结构化数据必须写且与 feed 一致</strong>：官方 price/availability mismatch 修复文档（<a href="https://support.google.com/merchants/answer/9773429" target="_blank">9773429</a>）明确要求 price 与 availability 与页面 schema markup 对齐——biz-seo-sdk 已输出 offers.availability=InStock，与 feed 统一 in_stock 吻合，<strong>无需新开发</strong>；⚠️ 反向约束：若未来上线缺货品，feed + JSON-LD + UI 三方必须同步改为真实状态，否则构成 Inaccurate availability 违规。</li>
   </ul>
 </div>
@@ -220,10 +221,10 @@
 </div>
 
 <!-- ==================== 2.9 PDP 价格展示必要性 ==================== -->
-<h3>2.9 PDP 前端必须展示价格（官方 Landing Page Requirements，2026-08-20）</h3>
+<h3>2.9 PDP 价格展示合规（官方 Landing Page Requirements，2026-08-20 复核修正）</h3>
 
 <div class="card">
-  <p><strong>问题：</strong>wlw PDP UI 不渲染价格（仅 JSON-LD 输出），“把价格展示在 PDP”是可选优化还是硬性要求？</p>
+  <p><strong>问题（2026-08-20 复核修正）：</strong>wlw PDP UI 是否满足官方 “clearly show the product price” 硬性要求？此前结论“UI 不渲染价格”已被 2.7 复核推翻——<strong>有价格品 UI 正常展示（“ab 119 €”等格式）</strong>。剩余合规风险：① 询价制“不可直接购买”② 非 EUR 币种 UI 换算 EUR 展示 vs feed 原币种。</p>
 
   <table>
     <tr><th>来源</th><th>要点</th></tr>
@@ -232,8 +233,8 @@
     <tr><td>price 属性定义（<a href="https://support.google.com/merchants/answer/6324371" target="_blank">6324371</a>）</td><td>“Submit an amount and currency that match the price on your landing page and the checkout pages”；变体价格场景：“different prices for each of these variants”（多规格多价可拆分为变体处理）</td></tr>
   </table>
 
-  <p><strong>结论：</strong>① PDP <strong>必须展示价格</strong>——官方 Landing page requirements 的硬性要求（“clearly show”），非可选优化；② 展示的价格必须与 feed 一致 → PDP 应显示 <strong>min 作为主价格（最显眼）</strong>，或显示阶梯价表（min 最显眼），与 feed / JSON-LD 三方一致；③ wlw 是询价制（无直接购买），叠加“UI 无价格”双缺口 → 若 PDP 不显示价格，GMC 投放存在被拒/无法使用的实质风险（2.7 结论据此修正）；④ biz-seo-sdk JSON-LD 已输出 min，<strong>无需改动</strong>，仅需前端 UI 渲染。</p>
-  <p><strong>行动：</strong>新增前置依赖——PDP 前端展示价格（min 主价格或阶梯表），产品侧改动，R1 上线前完成。</p>
+  <p><strong>结论（复核后）：</strong>① <strong>官方硬性要求已满足</strong>——wlw 有价格品 PDP UI 主价格区展示 “ab min €”（range 品显示 “min - max €”，min 在首位最显眼），符合 “clearly show” + “advertised product price must be the most prominent”；无价格品因数据库本身无价（64%），不涉及展示义务；② feed 用 <strong>min</strong> 与 UI / JSON-LD 三方一致（EUR 品实测 119=119、8212.5=8.212,50 €）→ <strong>price mismatch 风险极低</strong>；③ <strong>询价制“不可直接购买”风险独立保留</strong>——官方要求 “products can successfully be added to a cart and delivered”（2026-03-26 更新）与论坛结论（107143830：无价格 + 不可直接购买 → 不能使用 GMC）依旧适用，这是本方案第一大风险（与 2.7 availability 结论互相印证）；④ ⚠️ <strong>非 EUR 币种换算风险（新）</strong>——UI 将 CHF/GBP/SEK 等（~25.3k，4.4%）按汇率换算成 EUR 展示（实测 2.08 GBP → “2,43 €”），JSON-LD/数据库为原币；feed 需决定币种口径（见行动）。</p>
+  <p><strong>行动（复核后更新）：</strong>① <strong>移除原“PDP 前端展示价格”新增依赖</strong>（2026-08-20 复核已满足，无需产品侧开发，前置依赖表已更新）；② 新增待确认项——<strong>非 EUR 币种策略</strong>：技术确认 wlw 前端换算汇率/算法后，三选一：a) feed 按 EUR 换算价提交（与 UI 一致，需与 JSON-LD 原币解耦，爬虫校验风险需实测）；b) 非 EUR 品第一期 skip（~25.3k，4.4%）；c) 原币提交（不推荐，UI 金额/币种 mismatch 必触发）——R1 上线前定案。</p>
 </div>
 
 
@@ -259,8 +260,8 @@
   <li>82.9% 有价格品只有 price_min（本身就是单值），无需额外处理</li>
   <li>区间价中 49.1% 的 gap 在 1.5x 以内，use min 与实际价格偏差可控</li>
   <li><strong>行业实证（2026-08-20，见 2.8）：</strong>Made-in-China 等 B2B 平台在购物渠道提交并展示<strong>最低价（min）</strong>，页面 JSON-LD 亦输出 min——feed 用 min 与落地页完全一致，零 mismatch 风险；用 max（MOQ 档单价）与行业实践相反且必然 mismatch</li>
-  <li><strong>官方落地页要求（见 2.9）：</strong>落地页必须清晰展示价格，且“广告商品的价格必须最显眼” → PDP 将展示 min 作为主价格（新增产品依赖）</li>
-  <li><strong>例外处理：</strong>gap > 10x 的 20,769 个 offer 建议 <strong>skip（不上传）</strong>——mean(price_min, price_max) 与页面 JSON-LD（min）不一致，会触发 mismatch</li>
+  <li><strong>官方落地页要求（见 2.9）：</strong>“clearly show the product price” 已满足（2026-08-20 复核：有价格品 PDP UI 已展示 “ab min €”，无需新增依赖）——feed 用 min 与 UI / JSON-LD 三方一致；range 品 UI 显示 “min - max €”，min 在首位最显眼</li>
+  <li><strong>例外处理：</strong>gap > 10x 的 20,769 个 offer 建议 <strong>skip（不上传）</strong>——UI 展示 min-max 范围价，gap 过大时 min 与实际成交价偏离大，影响点击转化与审核观感（注：此前“与页面 JSON-LD 不一致”的理由不成立——JSON-LD 即输出 min，与 feed 一致）</li>
 </ul>
 </div>
 
@@ -429,7 +430,7 @@ identifier_exists → false (无 brand/GTIN/MPN 时声明)
   <tr><td>库存状态与 feed 不一致（缺货品场景）</td><td>页面显示与实际库存矛盾 → Inaccurate availability 违规（<a href="https://support.google.com/merchants/answer/9773127" target="_blank">9773127</a>）/ 用户点击后无法购买体验差</td><td>低（本期全量 in_stock + UI 不显示库存）</td><td>本期静态 in_stock 方案无需处理；未来缺货品上线前先定库存同步机制：feed + JSON-LD + UI 三方一致，out of stock 须置灰购买/询价按钮（<a href="https://www.seroundtable.com/google-merchant-center-out-of-stock-41100.html" target="_blank">2026-03 新要求</a>）</td></tr>
   <tr><td>访问入口在中文国家但商品描述全是德文</td><td>低转化</td><td>低</td><td>德语占 57%，GMC 按 target country 投放</td></tr>
   <tr><td>B2B 平台在 Shopping 中的表现</td><td>CTR 低于 C2C/B2C</td><td>高</td><td>Benchmark 已考虑 B2B 折扣; 目标已按中值上修（推全 +5，第一期 +3）</td></tr>
-  <tr><td>PDP 页面 UI 不显示价格（仅 JSON-LD 输出）</td><td>违反官方 <a href="https://support.google.com/merchants/answer/4752265" target="_blank">Landing page requirements</a>（“clearly show the product price”），叠加询价制“不可直接购买” → 存在无法使用 GMC / 商品被拒风险；且用户点击后看不到价格，转化打折</td><td>高</td><td><strong>新增依赖：PDP 展示 min 主价格</strong>（与 feed/JSON-LD 三方一致），R1 上线前完成；biz-seo-sdk 无需改</td></tr>
+  <tr><td>非 EUR 币种品 UI 按 EUR 换算展示（CHF/GBP/SEK 等 ~25.3k，4.4%）</td><td>feed 按原币提交 → 落地页 UI 金额/币种与 feed 不一致 → price mismatch disapproval；按 EUR 换算提交 → 与页面 JSON-LD 原币不一致（爬虫校验风险）</td><td>中</td><td>非 EUR 品策略 R1 前定案（见 2.9 行动）：优先按 wlw 前端汇率换算 EUR 提交（与 UI 一致）；或第一期 skip 非 EUR 品；不推荐原币提交</td></tr>
   <tr><td>Harry 8 月底才接手新项目</td><td>进度延后</td><td>低</td><td>方案先行，数据准备工作同步进行</td></tr>
 </table>
 
