@@ -114,8 +114,8 @@
 
 <table>
   <tr><th>Dependency</th><th>Description</th><th>Status</th></tr>
-  <tr><td><a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a></td><td>GMC account setup / configuration — <strong>separate account per domain (confirmed 2026-08-20): Phase 1 = 4 accounts wlw.de + europages.it / europages.es / europages.fr, each with its own independent feed and target country (DE/FR/ES/IT, all Eurozone, unified EUR)</strong></td><td><span class="badge yellow">Pending confirmation</span></td></tr>
-  <tr><td><a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a></td><td><strong>GMC domain verification (incl. EP domains, merged on 2026-08-20)</strong> — Phase 1 covers 4 domains (wlw.de + europages.it + europages.es + europages.fr), each account verifies its own domain; GMC requires that the domain of the <code>link</code> attribute in the feed must be "verified and claimed" <strong>in that domain's own account</strong>: each EP domain gets a separate account and verifies its own domain; EP domains are assigned by target-sales-country site (<strong>country-site model, confirmed 2026-08-20: ep.fr lists products that can be sold to France, with the product pool coming from all European countries, not only French companies; ep.fr ~124k / ep.es ~77k / ep.it ~51k, see 2.1 for scale</strong>); unverified → link reports mismatched domain and products are not served. Chain: confirm EP's own PDP URL pattern (see 4.C) → each account completes domain verification → products of that domain can be uploaded; remaining EP country domains (de ~195k / co.uk ~69k / nl ~39k etc. ≈ 490k) open accounts in later phases</td><td><span class="badge yellow">Pending confirmation</span></td></tr>
+  <tr><td><a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a></td><td>GMC account setup / configuration — <strong>separate account per domain: Phase 1 = wlw.de only (account approved &amp; fully configured, 2026-08-20); EP accounts (europages.it / europages.es / europages.fr) created but <span class="badge yellow">pending GMC account review</span> — EP onboarding deferred until approval (see 2.3)</strong>; each account has its own independent feed and target country (DE/FR/ES/IT, all Eurozone, unified EUR)</td><td><span class="badge yellow">wlw.de ✅ / EP review pending</span></td></tr>
+  <tr><td><a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a></td><td><strong>GMC domain verification (incl. EP domains, merged on 2026-08-20)</strong> — Phase 1 covers <strong>wlw.de only</strong> (EP domains deferred, see 2.3); each account verifies its own domain; GMC requires that the domain of the <code>link</code> attribute in the feed must be "verified and claimed" <strong>in that domain's own account</strong>: each EP domain gets a separate account and verifies its own domain; EP domains are assigned by target-sales-country site (<strong>country-site model, confirmed 2026-08-20: ep.fr lists products that can be sold to France, with the product pool coming from all European countries, not only French companies; ep.fr ~118k / ep.es ~68k / ep.it ~50k, see 2.1 for scale</strong>); unverified → link reports mismatched domain and products are not served. Chain: confirm EP's own PDP URL pattern (see 4.C) → each account completes domain verification → products of that domain can be uploaded; remaining EP country domains (de ~195k / co.uk ~69k / nl ~39k etc. ≈ 490k) open accounts in later phases</td><td><span class="badge yellow">Pending confirmation</span></td></tr>
   <tr><td><a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a></td><td>GMC feed configuration infrastructure</td><td><span class="badge yellow">Pending confirmation</span></td></tr>
   <tr><td>Feed update mechanism</td><td>Design of incremental / full refresh</td><td><span class="badge yellow">Needs tech design</span></td></tr>
 </table>
@@ -123,28 +123,44 @@
 <!-- ==================== 2. Scope of Implementation ==================== -->
 <h2 id="en2">2. Scope of Implementation</h2>
 
-<h3>2.1 Phase 1 Scope (4 GMC accounts, split by domain on 2026-08-20)</h3>
+<h3>2.1 Phase 1 Scope (wlw.de only; EP accounts pending GMC review — updated 2026-08-20)</h3>
 <table>
-  <tr><th>GMC account (domain)</th><th>Offers with price</th><th>GMC Ready*</th><th>Single price (Phase 1 first)</th><th>Range price (Phase 2)</th></tr>
-  <tr><td><strong>wlw.de</strong> (all wlw=true)</td><td class="num">568,945</td><td class="num">567,428</td><td class="num">477,828</td><td class="num">89,600</td></tr>
-  <tr><td><strong>europages.fr</strong> (products sellable in France)</td><td class="num">117,962</td><td class="num">116,792</td><td class="num">105,186</td><td class="num">11,606</td></tr>
+  <tr><th>GMC account (domain)</th><th>Offers with price</th><th>GMC Ready*</th><th>Single price (Phase 1 first)</th><th>Range price (Phase 2)</th><th>Status (2026-08-20)</th></tr>
+  <tr><td><strong>wlw.de</strong> (all wlw=true)</td><td class="num">568,945</td><td class="num">567,428</td><td class="num">477,828</td><td class="num">89,600</td><td><span class="badge green">✅ Ready — Phase 1</span></td></tr>
+  <tr><td><strong>europages.fr</strong> (products sellable in France)</td><td class="num">117,962</td><td class="num">116,792</td><td class="num">105,186</td><td class="num">11,606</td><td rowspan="3"><span class="badge yellow">⏳ Deferred — GMC account review pending</span></td></tr>
   <tr><td><strong>europages.es</strong> (products sellable in Spain)</td><td class="num">68,091</td><td class="num">67,842</td><td class="num">56,161</td><td class="num">11,681</td></tr>
   <tr><td><strong>europages.it</strong> (products sellable in Italy)</td><td class="num">49,532</td><td class="num">49,481</td><td class="num">38,684</td><td class="num">10,797</td></tr>
-  <tr><td><strong>Phase 1 total</strong></td><td class="num"><strong>804,530</strong></td><td class="num"><strong>801,543</strong></td><td class="num"><strong>~678k</strong></td><td class="num"><strong>~124k</strong></td></tr>
+  <tr><td><strong>Phase 1 total (wlw.de only)</strong></td><td class="num"><strong>568,945</strong></td><td class="num"><strong>567,428</strong></td><td class="num"><strong>~478k</strong></td><td class="num"><strong>~90k</strong></td><td></td></tr>
 </table>
-<p class="footnote">* GMC Ready = has price + has title (≤150) + has description (≤5000) + has image (Redshift 2026-08-20). EP domains are assigned by target-sales-country site (<strong>country-site model, confirmed 2026-08-20: ep.XX lists products sellable in that country; the pool comes from all European countries, not only that country's companies</strong>); ep.fr/es/it count non-wlw offers only (dual-platform offers are already in the wlw.de account), no duplicates across the 4 accounts. ~110k after skipping range offers with gap&gt;10x.</p>
+<p class="footnote">* GMC Ready = has price + has title (≤150) + has description (≤5000) + has image (Redshift 2026-08-20). EP domains are assigned by target-sales-country site (<strong>country-site model, confirmed 2026-08-20: ep.XX lists products sellable in that country; the pool comes from all European countries, not only that country's companies</strong>); ep.fr/es/it count non-wlw offers only (dual-platform offers are already in the wlw.de account), no duplicates across accounts. <strong>Phase 1 launches wlw.de only (EP accounts pending GMC review, updated 2026-08-20); EP 3 domains (~236k priced offers) move to Phase 3 (see 2.2/2.3).</strong> ~81k wlw.de range offers after skipping gap&gt;10x.</p>
 
-<p><strong>Phase 1 selection logic:</strong> 4 accounts (domains) run in parallel; each account first uploads <strong>single-price</strong> offers (Phase 1, ~678k), then <strong>range-price</strong> offers (Phase 2, ~124k).</p>
+<p><strong>Phase 1 selection logic (updated 2026-08-20):</strong> <strong>wlw.de account only</strong> — first upload <strong>single-price</strong> offers (Phase 1, ~478k), then <strong>range-price</strong> offers (Phase 2, ~90k). EP accounts (ep.fr/es/it, ~236k priced offers) follow in Phase 3 once EP GMC account review passes (see 2.3 for EP risks).</p>
 
-<h3>2.2 Rollout Phases (by domain account)</h3>
+<h3>2.2 Rollout Phases (by domain account, updated 2026-08-20)</h3>
 <table>
   <tr><th>Phase</th><th>Scope</th><th>Estimated volume</th></tr>
-  <tr><td>Phase 1 (Phase-1 MVP)</td><td>Each of the 4 accounts uploads <strong>single-price</strong> offers: wlw.de ~478k + ep.fr ~105k + ep.es ~56k + ep.it ~39k <strong>(starts after PDP price display dependency is live, see 3.9)</strong></td><td class="num">~678k</td></tr>
-  <tr><td>Phase 2 (within Phase 1 period)</td><td>Each of the 4 accounts uploads <strong>range-price</strong> offers (price=min; skip gap&gt;10x): wlw.de ~90k + ep.fr ~12k + ep.es ~12k + ep.it ~11k</td><td class="num">~124k (~110k after skip)</td></tr>
-  <tr><td>Phase 3 (later)</td><td>Open new accounts for remaining EP country domains (europages.de / .co.uk / .nl / .com etc.): DE ~195k + GB ~69k + TR ~40k + NL ~39k + PL ~33k + PT ~21k + others (<strong>incl. non-Eurozone country sites: GB/CH/SE/PL/TR/CZ/DK/RO/HU/NO etc., currency approach in the table below</strong>)</td><td class="num">~490k</td></tr>
-  <tr><td>Phase 4 (wrap-up)</td><td>Handle long title/desc fields + complete short titles (brand + model + category)</td><td class="num">~28k</td></tr>
-  <tr><td><strong>Grand total</strong></td><td>(Phase 1 ~805k + Phase 3 ~490k + Phase 4 completion) ≈ covers all priced offers on the platform</td><td class="num"><strong>~1,258k</strong></td></tr>
+  <tr><td>Phase 1 (Phase-1 MVP, wlw.de only)</td><td>wlw.de uploads <strong>single-price</strong> offers ~478k <strong>(starts after PDP price display dependency is live, see 3.9)</strong></td><td class="num">~478k</td></tr>
+  <tr><td>Phase 2 (within Phase 1 period)</td><td>wlw.de uploads <strong>range-price</strong> offers (price=min; skip gap&gt;10x) ~90k</td><td class="num">~90k (~81k after skip)</td></tr>
+  <tr><td>Phase 3 (after EP GMC account approval)</td><td>EP accounts ep.fr/es/it upload single-price + range-price: ep.fr ~117k + ep.es ~68k + ep.it ~50k (incl. dual-platform offers)</td><td class="num">~236k</td></tr>
+  <tr><td>Phase 4 (later)</td><td>Open new accounts for remaining EP country domains (europages.de / .co.uk / .nl / .com etc.): DE ~195k + GB ~69k + TR ~40k + NL ~39k + PL ~33k + PT ~21k + others (<strong>incl. non-Eurozone country sites: GB/CH/SE/PL/TR/CZ/DK/RO/HU/NO etc., currency approach in the table below</strong>)</td><td class="num">~490k</td></tr>
+  <tr><td>Phase 5 (wrap-up)</td><td>Handle long title/desc fields + complete short titles (brand + model + category)</td><td class="num">~28k</td></tr>
+  <tr><td><strong>Grand total</strong></td><td>(Phase 1-2 ~569k + Phase 3 ~236k + Phase 4 ~490k + Phase 5 completion) ≈ covers all priced offers on the platform</td><td class="num"><strong>~1,258k</strong></td></tr>
 </table>
+
+<h3>2.3 EP Deferral &amp; EP-specific Risks (2026-08-20)</h3>
+<div class="card">
+  <p><strong>Why EP is deferred in Phase 1:</strong> EP GMC accounts (europages.fr/es/it) have been created but are <strong>still pending GMC account review</strong> — products cannot be uploaded until an account is approved. The wlw.de account is approved and fully configured, so Phase 1 launches <strong>wlw.de only</strong>.</p>
+  <p><strong>EP-specific risks that a wlw.de-only test does NOT cover (verify at EP onboarding):</strong></p>
+  <table>
+    <tr><th>#</th><th>EP risk / difference vs wlw.de</th><th>Scale</th><th>Feed impact</th></tr>
+    <tr><td>1</td><td>Non-EUR original currencies (GBP/PLN/TRL/CHF…) must be FX-converted to EUR matching the frontend rate</td><td>EP ~129k (19% of priced) vs wlw 25.3k (4.4%)</td><td>Price mismatch → disapproval / wrong-price display; TRL high volatility → evaluate separately or skip</td></tr>
+    <tr><td>2</td><td>Multi-language titles/descriptions (DE/EN/FR/ES/IT…) — EP pool is pan-European suppliers</td><td>EP pool across all EU countries</td><td>GMC match quality; per-language truncation rules</td></tr>
+    <tr><td>3</td><td>EP domain verification (UC-352) in each EP account</td><td>3 Phase-3 domains (fr/es/it) + 10+ later</td><td>Unverified → link mismatched domain, products not served</td></tr>
+    <tr><td>4</td><td>Country-site model: ep.XX lists products sellable in that country, pool from all European countries</td><td>ep.fr ~118k / ep.es ~68k / ep.it ~50k priced</td><td>Offer-to-account mapping correctness (which offers belong to which EP account)</td></tr>
+    <tr><td>5</td><td>EP PDP URL pattern: <code>/fr/company/{cs}-{cid}/products/{ps}-{pid}</code> — same structure as wlw, different language path + domain</td><td>All EP offers</td><td>Low (verified HTTP 200), re-verify per domain at onboarding</td></tr>
+  </table>
+  <p><strong>Decision (2026-08-20):</strong> Phase 1 = wlw.de only; EP (ep.fr/es/it, ~236k priced offers) moves to Phase 3, gated on EP GMC account approval. The wlw.de-only test validates the core chain (feed → GMC ingestion → Free Listings → GA4 attribution); the EP risks above are tracked in the risk register (Ch. 9) and verified at EP onboarding.</p>
+</div>
 
 <p><strong>Full-scale currency setup (direction confirmed 2026-08-20):</strong> All EP country-site frontends <strong>display EUR uniformly</strong> (verified: ep.fr PDP “16,00 €”/“32,00 - 40,00 €”; ep.co.uk site shows UK-company offers as “55,00 €”/“from 11,69 €” — BEE 4 LIMITED's Industrial Labels listing has original price 10 GBP → frontend “from 11,69 €”, GBP→EUR conversion with the same mechanism as wlw) → <strong>feed submits EUR uniformly across the board</strong>, consistent with landing pages and satisfying GMC's three-way consistency (6324371 / 7052112); <strong>non-Eurozone market targeting (UK/CH/SE/PL…)</strong>: a GMC account can set multiple target countries (<a href="https://support.google.com/merchants/answer/14991840" target="_blank">14991840</a>), the feed stays in EUR, and Google's official <strong>Currency Conversion</strong> automatically displays the target-country currency (<a href="https://support.google.com/merchants/answer/160637" target="_blank">160637</a> “other currencies may be supported using currency conversion”) → no per-country conversion needed; <strong>offers originally priced in non-EUR currencies (~129k new at full rollout, ~19% of EP priced offers):</strong> GB 55,008 GBP / PL 30,433 PLN / TR 14,989 TRL / RO 8,977 RON / CZ 5,405 CZK / DK 4,331 DKK / CH 4,899 CHF / HU 4,489 HUF / SE 422 / others ≈129k + wlw.de 25.3k — convert to EUR with the same FX rate as the frontend (consistent with UI); TRL evaluated separately due to high volatility; or skip per country pool. EUR-priced offers are unaffected (EUR share of non-Eurozone country pools is 25-99%, e.g. GB 29.3% / PL 38.6% / SE 66.8% / BG 98.6%).</p>
 
@@ -166,7 +182,7 @@
   <tr><td>Dual-platform (wlw+ep)</td><td class="num">146,835</td><td class="num">11.7%</td><td class="num">—</td></tr>
 </table>
 <p class="footnote">* GMC Ready = has price + has title (≤150) + has description (≤5000) + has image. Excludes URL and availability.</p>
-<p class="footnote"><strong>europages assigned to subdomains by target-sales-country site (2026-08-20, separate accounts per domain):</strong> ep.fr lists offers <strong>sellable in France</strong> (pool from all European countries, not only French companies); Phase 1 opens <strong>ep.fr ~124k / ep.es ~77k / ep.it ~51k</strong> (priced offers, incl. dual-platform); remaining countries (de ~195k / co.uk ~69k / nl ~39k / pl ~33k / pt ~21k etc.) ≈ 490k stay for later phases (see 2.2).</p>
+<p class="footnote"><strong>europages assigned to subdomains by target-sales-country site (2026-08-20, separate accounts per domain):</strong> ep.fr lists offers <strong>sellable in France</strong> (pool from all European countries, not only French companies); <strong>Phase 1 = wlw.de only (updated 2026-08-20, EP GMC account review pending);</strong> EP onboarding (ep.fr ~118k / ep.es ~68k / ep.it ~50k, incl. dual-platform) moves to Phase 3 (see 2.1/2.3); remaining countries (de ~195k / co.uk ~69k / nl ~39k / pl ~33k / pt ~21k etc.) ≈ 490k stay for later phases (see 2.2).</p>
 
 <h3>3.2 GMC Required Fields Check (7 fields)</h3>
 <table>
@@ -463,7 +479,7 @@ identifier_exists → false (declare when no brand/GTIN/MPN)
 <h3>6.4 Data requirements checklist</h3>
 <table>
   <tr><th>#</th><th>Requirement</th><th>Owner</th><th>Status</th></tr>
-  <tr><td>1</td><td>Enable organic shopping auto-tag in all 4 GMC accounts + link the GA4 property (option A)</td><td>GMC account config (UC-351 execution)</td><td><span class="badge yellow">To do — W34/W35</span></td></tr>
+  <tr><td>1</td><td>Enable organic shopping auto-tag in the wlw.de GMC account + link the GA4 property (option A); EP accounts at Phase 3 onboarding</td><td>GMC account config (UC-351 execution)</td><td><span class="badge yellow">To do — W34/W35</span></td></tr>
   <tr><td>2</td><td>Confirm/extend warehouse channel mapping to include organic_shopping (ga_user_metrics + active_buyers attribution)</td><td>Data team (dbt)</td><td><span class="badge yellow">Confirm before R1</span></td></tr>
   <tr><td>3</td><td>(Fallback) append UTM to feed link (option B)</td><td>Feed generation</td><td><span class="badge yellow">Optional</span></td></tr>
   <tr><td>4</td><td>Weekly funnel dashboard: Shopping UV → AB → AB2 (T-3), by account/domain</td><td>This plan</td><td><span class="badge yellow">To build</span></td></tr>
@@ -476,16 +492,16 @@ identifier_exists → false (declare when no brand/GTIN/MPN)
 <div class="card">
 <h3>Target: AB2 +5 (full rollout) breakdown</h3>
 <table>
-  <tr><th>Metric</th><th>Phase 1 (4 domains ~805k)</th><th>Full rollout (~1,258k)</th><th>Source</th></tr>
-  <tr><td>Phase-1 4-domain priced offers (wlw.de + ep.it/es/fr)</td><td class="num">~805k</td><td class="num">~1,258k (1.56x)</td><td>Redshift query 2026-08-20</td></tr>
+  <tr><th>Metric</th><th>Phase 1 (wlw.de ~569k)</th><th>Full rollout (~1,258k)</th><th>Source</th></tr>
+  <tr><td>Phase-1 wlw.de priced offers (single + range)</td><td class="num">~569k</td><td class="num">~1,258k (2.2x)</td><td>Redshift query 2026-08-20</td></tr>
   <tr><td>Google Shopping Organic CTR (estimate)</td><td class="num">~0.5-1.5%</td><td class="num">~0.5-1.5%</td><td>Industry benchmark (B2B is low)</td></tr>
-  <tr><td>Daily Shopping clicks (estimated)</td><td class="num">~4,000-12,100</td><td class="num">~6,300-18,900</td><td>Priced offers × CTR</td></tr>
+  <tr><td>Daily Shopping clicks (estimated)</td><td class="num">~2,800-8,500</td><td class="num">~6,300-18,900</td><td>Priced offers × CTR</td></tr>
   <tr><td>CVR → AB (reference mean)</td><td class="num">~2-4%</td><td class="num">~2-4%</td><td>SEO channel CVR baseline</td></tr>
-  <tr><td>Daily AB (estimated)</td><td class="num">~80-480</td><td class="num">~125-750</td><td></td></tr>
+  <tr><td>Daily AB (estimated)</td><td class="num">~56-340</td><td class="num">~125-750</td><td></td></tr>
   <tr><td>AB→AB2 CVR</td><td class="num">~1-3%</td><td class="num">~1-3%</td><td>SEO channel AB→AB2 baseline</td></tr>
-  <tr><td>Daily AB2 increment (estimated)</td><td class="num">~0.8-14</td><td class="num">~1.3-22.5</td><td>Mid-range ~5-7</td></tr>
+  <tr><td>Daily AB2 increment (estimated)</td><td class="num">~0.6-10</td><td class="num">~1.3-22.5</td><td>Mid-range ~3.5-5</td></tr>
 </table>
-<p><strong>Target:</strong> Phase 1 <strong>+3 AB2/day</strong> (mid-range), full rollout <strong>+5 AB2/day</strong> (slightly above mid-range) — full-rollout volume 1,258k is 1.56x Phase 1, linear extrapolation of AB2 increment mid-range ≈5.5; +5 balances long-tail traffic and review volatility, neither conservative (no +1 floor) nor aggressive (not betting on the 22 ceiling). Tune against actual data 4 weeks after launch.</p>
+<p><strong>Target:</strong> Phase 1 (wlw.de) <strong>+3 AB2/day</strong> (mid-range), full rollout <strong>+5 AB2/day</strong> (conservative, achievable) — full-rollout volume 1,258k is 2.2x Phase-1 wlw.de (~569k), linear extrapolation of AB2 increment mid-range ≈3.5-5 gives ≈7.7-11; +5 is conservative (below the linear floor) and does not rely on EP onboarding; once EP passes GMC review (Phase 3, ~236k) its increment adds on top. Tune against actual data 4 weeks after launch.</p>
 </div>
 
 <!-- ==================== 8. Recommended Execution Plan ==================== -->
@@ -494,20 +510,20 @@ identifier_exists → false (declare when no brand/GTIN/MPN)
 <table>
   <tr><th>Week</th><th>Actions</th><th>Deliverable</th></tr>
   <tr><td>W34 (8/17-23)</td>
-    <td>① Confirm the 4 GMC accounts are opened (wlw.de + ep.it/es/fr, <a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a>/<a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a>/<a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a>)<br>② Confirm verification status of the 4 domains<br>③ Confirm the EP own PDP URL pattern</td>
+    <td>① Confirm GMC accounts: wlw.de ✅ approved &amp; fully configured (2026-08-20); EP accounts (ep.fr/es/it) created but <strong>pending GMC account review</strong> (<a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a>/<a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a>/<a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a>)<br>② Confirm wlw.de domain verification status<br>③ Track EP GMC account review weekly (Phase-3 gate, see 2.3)</td>
     <td>Prerequisite checklist (one page)</td>
   </tr>
   <tr><td>W35 (8/24-30)</td>
-    <td>① Phase 1 feed generation &amp; upload (single-price offers across 4 accounts)<br>② Monitor GMC review status<br>③ Handle Feed Disapprovals</td>
-    <td>~678k single-price offers live on 4 accounts</td>
+    <td>① Phase 1 feed generation &amp; upload (wlw.de single-price offers, ~478k)<br>② Monitor GMC review status<br>③ Handle Feed Disapprovals</td>
+    <td>~478k single-price offers live on wlw.de</td>
   </tr>
   <tr><td>W36-W37 (8/31-9/13)</td>
-    <td>① Phase 2 range-price upload (4 accounts)<br>② Set up incremental update mechanism<br>③ Shop Ads evaluation (optional)</td>
+    <td>① Phase 2 wlw.de range-price upload (~90k; ~81k after skipping gap&gt;10x)<br>② Set up incremental update mechanism<br>③ Shop Ads evaluation (optional)</td>
     <td>Range-price offers + incremental pipeline</td>
   </tr>
   <tr><td>W38-W40 (9/14-10/4)</td>
-    <td>① Phase 3 remaining EP domain accounts (de/co.uk/nl/com etc.)<br>② Data review (after 4 weeks)<br>③ Performance tuning</td>
-    <td>Full rollout + performance report</td>
+    <td>① Phase 3 EP accounts ep.fr/es/it (~236k) — starts once EP GMC account review passes<br>② Phase 4 remaining EP domain accounts (de/co.uk/nl/com etc.)<br>③ Data review (after 4 weeks)<br>④ Performance tuning</td>
+    <td>EP onboarding + full rollout + performance report</td>
   </tr>
 </table>
 
@@ -516,7 +532,8 @@ identifier_exists → false (declare when no brand/GTIN/MPN)
 
 <table>
   <tr><th>Risk</th><th>Impact</th><th>Probability</th><th>Mitigation</th></tr>
-  <tr><td>GMC accounts/domains not verified</td><td>Cannot upload</td><td>Medium</td><td>Confirm 4 accounts + 4 domain verification status first (<a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a>/<a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a>/<a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a>); EP own PDP URL pattern already verified (see 4.C)</td></tr>
+  <tr><td>GMC accounts/domains not verified</td><td>Cannot upload</td><td>Medium</td><td>wlw.de ✅ approved &amp; configured (Phase 1 OK, 2026-08-20); track EP account review weekly (fr/es/it pending); confirm remaining EP domain accounts (de/co.uk/nl etc.) in later phases (<a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a>/<a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a>/<a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a>); EP own PDP URL pattern already verified (see 4.C)</td></tr>
+  <tr><td><strong>EP onboarding delayed — GMC account review still pending (new 2026-08-20)</strong></td><td>EP (ep.fr/es/it ~236k priced offers) cannot start Phase 3; wlw.de-only Phase 1 unaffected</td><td>High (current status: pending)</td><td>Phase 1 = wlw.de only (already launched); EP-specific risks (FX conversion, multi-language, domain verification, country-site mapping — see 2.3) verified at EP onboarding; re-check account review status weekly</td></tr>
   <tr><td>Using min for range prices triggers Disapproval</td><td>Partial deactivation</td><td>Low-Medium</td><td>Review the ~20k offers with gap&gt;10x, then decide to skip</td></tr>
   <tr><td><strong>Tiered-price max/min gap too large but still submitting min → customer complaints (new 2026-08-20)</strong></td><td>Buyers send inquiries at the displayed min price but close at a higher tier (MOQ tier); the price gap causes complaints/trust issues (sensitive in B2B); 20,769 offers with gap&gt;10x already skipped, 1.5x-10x range offers still use min</td><td>Medium</td><td>After launch, monitor inquiry complaints and deal-price gaps; for larger gaps (e.g. &gt;3x): a) skip in sync; b) confirm with the product side to submit max/mean instead; c) UI “ab min €” already implies the lowest-price semantics; add tiered-price explanation copy if needed</td></tr>
   <tr><td>PDP landing page and price mismatch</td><td>Disapproval</td><td>Medium</td><td>Ensure the price shown on the landing page matches the feed</td></tr>
@@ -563,7 +580,7 @@ WHERE so.delete_time IS NULL
 --           /produkte/{product_slug_id}                 (no slug, ARISE-1239 fallback, verified 200)
 </pre>
 
-<h3>Phase-1 4-domain distribution SQL (2026-08-20)</h3>
+<h3>Phase-1 domain distribution SQL (2026-08-20; Phase 1 = wlw.de only)</h3>
 <pre>
 -- Split by domain account (wlw=true all go to wlw.de; EP assigned to ep.XX by target-sales-country site (lists offers sellable in that country, pool from all European countries); ep counts non-wlw offers only to avoid duplicates)
 SELECT CASE WHEN cc.platform_wlw THEN 'wlw.de'
@@ -577,7 +594,7 @@ WHERE so.delete_time IS NULL AND so.publish_time IS NOT NULL
   AND so.data_price_min IS NOT NULL AND so.data_price_min > 0
   AND (cc.platform_wlw OR (cc.platform_ep AND cc.country IN ('FR','ES','IT')))
 GROUP BY 1, 2;
--- Phase-1 total 804,530 priced offers (single fixed+from ~678k + range ~124k, ~110k after skipping gap>10x)
+-- Phase 1 (wlw.de only) 568,945 priced offers (single ~478k + range ~90k, ~81k after skipping gap>10x); EP fr/es/it ~236k move to Phase 3 (after EP GMC account approval, see 2.2/2.3)
 </pre>
 
 <h3>Data validation SQL scripts</h3>
@@ -620,8 +637,8 @@ WHERE so.delete_time IS NULL AND so.publish_time IS NOT NULL
 
 <table>
   <tr><th>依赖</th><th>说明</th><th>状态</th></tr>
-  <tr><td><a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a></td><td>GMC 账号开通 / 配置——<strong>按域名单开账号（2026-08-20 确认）：第一期 4 个账号 = wlw.de + europages.it / europages.es / europages.fr，各自独立 feed、独立 target country（DE/FR/ES/IT，全部欧元区，统一 EUR）</strong></td><td><span class="badge yellow">待确认</span></td></tr>
-  <tr><td><a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a></td><td><strong>GMC 域名验证（含 EP 域名验证，2026-08-20 合并）</strong>——第一期 4 域名（wlw.de + europages.it + europages.es + europages.fr），各账号验证各自域名；GMC 要求 feed 中 <code>link</code> 指向的域名必须在<strong>该域名自己的账号</strong>内完成“验证 + 声明”（verify and claim website）：每个 EP 域名开独立账号、各自验证各自域名；EP 域名按目标销售国家站归属（<strong>国家站模式，2026-08-20 确认：ep.fr 收录可卖到法国的品，品池来自欧洲各国、非仅法国公司；ep.fr ~124k / ep.es ~77k / ep.it ~51k，量级见 2.1</strong>）；未验证 → link 报 mismatched domain、商品不收录。链路：先确认 EP 自有 PDP URL 模式（见 4.C）→ 各账号完成域名验证 → 各域名品即可上传；其余 EP 国家域名（de ~195k / co.uk ~69k / nl ~39k 等 ≈ 490k）后续阶段再开账号</td><td><span class="badge yellow">待确认</span></td></tr>
+  <tr><td><a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a></td><td>GMC 账号开通 / 配置——<strong>按域名单开账号（2026-08-20 更新）：第一期 = 仅 wlw.de（账号已通过并完全配置，2026-08-20）；EP 账号（europages.it / europages.es / europages.fr）已创建但 <span class="badge yellow">待 GMC 账号审核</span>——EP 上线延后至审核通过（见 2.3）</strong>；各账号独立 feed、独立 target country（DE/FR/ES/IT，全部欧元区，统一 EUR）</td><td><span class="badge yellow">wlw.de ✅ / EP 审核中</span></td></tr>
+  <tr><td><a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a></td><td><strong>GMC 域名验证（含 EP 域名验证，2026-08-20 合并）</strong>——第一期覆盖 <strong>仅 wlw.de</strong>（EP 域名延后，见 2.3），各账号验证各自域名；GMC 要求 feed 中 <code>link</code> 指向的域名必须在<strong>该域名自己的账号</strong>内完成“验证 + 声明”（verify and claim website）：每个 EP 域名开独立账号、各自验证各自域名；EP 域名按目标销售国家站归属（<strong>国家站模式，2026-08-20 确认：ep.fr 收录可卖到法国的品，品池来自欧洲各国、非仅法国公司；ep.fr ~118k / ep.es ~68k / ep.it ~50k，量级见 2.1</strong>）；未验证 → link 报 mismatched domain、商品不收录。链路：先确认 EP 自有 PDP URL 模式（见 4.C）→ 各账号完成域名验证 → 各域名品即可上传；其余 EP 国家域名（de ~195k / co.uk ~69k / nl ~39k 等 ≈ 490k）后续阶段再开账号</td><td><span class="badge yellow">待确认</span></td></tr>
   <tr><td><a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a></td><td>GMC Feed 配置基础建设</td><td><span class="badge yellow">待确认</span></td></tr>
     <tr><td>Feed 更新机制</td><td>增量更新 / 全量刷新的方案设计</td><td><span class="badge yellow">需技术设计</span></td></tr>
 </table>
@@ -629,28 +646,44 @@ WHERE so.delete_time IS NULL AND so.publish_time IS NOT NULL
 <!-- ==================== 2. 实施范围 ==================== -->
 <h2 id="cn2">2. 实施范围</h2>
 
-<h3>2.1 第一期 Scope（4 个 GMC 账号，2026-08-20 按域名切分）</h3>
+<h3>2.1 第一期 Scope（仅 wlw.de；EP 账号待 GMC 审核 — 2026-08-20 更新）</h3>
 <table>
-  <tr><th>GMC 账号（域名）</th><th>带价品</th><th>GMC Ready*</th><th>其中单值价（Phase 1 先传）</th><th>区间价（Phase 2）</th></tr>
-  <tr><td><strong>wlw.de</strong>（wlw=true 全部）</td><td class="num">568,945</td><td class="num">567,428</td><td class="num">477,828</td><td class="num">89,600</td></tr>
-  <tr><td><strong>europages.fr</strong>（可卖到法国的品）</td><td class="num">117,962</td><td class="num">116,792</td><td class="num">105,186</td><td class="num">11,606</td></tr>
+  <tr><th>GMC 账号（域名）</th><th>带价品</th><th>GMC Ready*</th><th>其中单值价（Phase 1 先传）</th><th>区间价（Phase 2）</th><th>状态（2026-08-20）</th></tr>
+  <tr><td><strong>wlw.de</strong>（wlw=true 全部）</td><td class="num">568,945</td><td class="num">567,428</td><td class="num">477,828</td><td class="num">89,600</td><td><span class="badge green">✅ Ready — Phase 1</span></td></tr>
+  <tr><td><strong>europages.fr</strong>（可卖到法国的品）</td><td class="num">117,962</td><td class="num">116,792</td><td class="num">105,186</td><td class="num">11,606</td><td rowspan="3"><span class="badge yellow">⏳ 延后 — 待 GMC 账号审核</span></td></tr>
   <tr><td><strong>europages.es</strong>（可卖到西班牙的品）</td><td class="num">68,091</td><td class="num">67,842</td><td class="num">56,161</td><td class="num">11,681</td></tr>
   <tr><td><strong>europages.it</strong>（可卖到意大利的品）</td><td class="num">49,532</td><td class="num">49,481</td><td class="num">38,684</td><td class="num">10,797</td></tr>
-  <tr><td><strong>第一期合计</strong></td><td class="num"><strong>804,530</strong></td><td class="num"><strong>801,543</strong></td><td class="num"><strong>~678k</strong></td><td class="num"><strong>~124k</strong></td></tr>
+  <tr><td><strong>第一期合计（仅 wlw.de）</strong></td><td class="num"><strong>568,945</strong></td><td class="num"><strong>567,428</strong></td><td class="num"><strong>~478k</strong></td><td class="num"><strong>~90k</strong></td><td></td></tr>
 </table>
-<p class="footnote">* GMC Ready = has price + has title (≤150) + has description (≤5000) + has image（Redshift 2026-08-20）。EP 域名按目标销售国家站归属（<strong>国家站模式，2026-08-20 确认：ep.XX 收录可卖到该国的品，品池来自欧洲各国、非仅该国公司</strong>）；ep.fr/es/it 仅计非 wlw 品（双平台品已在 wlw.de 账号），4 账号间无重复。区间价 gap&gt;10x skip 后 ~110k。</p>
+<p class="footnote">* GMC Ready = has price + has title (≤150) + has description (≤5000) + has image（Redshift 2026-08-20）。EP 域名按目标销售国家站归属（<strong>国家站模式，2026-08-20 确认：ep.XX 收录可卖到该国的品，品池来自欧洲各国、非仅该国公司</strong>）；ep.fr/es/it 仅计非 wlw 品（双平台品已在 wlw.de 账号），各账号间无重复。wlw.de 区间价 gap&gt;10x skip 后 ~81k。<strong>第一期仅上线 wlw.de（EP 账号待 GMC 审核，2026-08-20 更新）；EP 3 域名（~236k 带价品）移至 Phase 3（见 2.2/2.3）。</strong></p>
 
-<p><strong>第一期选品逻辑：</strong>4 个账号（域名）并行，各账号先传<strong>单值价</strong>品（Phase 1，~678k）→ 再传<strong>区间价</strong>品（Phase 2，~124k）。</p>
+<p><strong>第一期选品逻辑（2026-08-20 更新）：</strong><strong>仅 wlw.de 账号</strong>——先传<strong>单值价</strong>品（Phase 1，~478k）→ 再传<strong>区间价</strong>品（Phase 2，~90k）。EP 账号（ep.fr/es/it，~236k 带价品）待 EP GMC 账号审核通过后进入 Phase 3（EP 风险见 2.3）。</p>
 
-<h3>2.2 发布阶段（按域名账号）</h3>
+<h3>2.2 发布阶段（按域名账号，2026-08-20 更新）</h3>
 <table>
   <tr><th>阶段</th><th>Scope</th><th>预估量级</th></tr>
-  <tr><td>Phase 1（第一期 MVP）</td><td>4 账号各传<strong>单值价</strong>品：wlw.de ~478k + ep.fr ~105k + ep.es ~56k + ep.it ~39k <strong>（PDP 价格展示依赖上线后启动，见 3.9）</strong></td><td class="num">~678k</td></tr>
-  <tr><td>Phase 2（第一期内）</td><td>4 账号各传<strong>区间价</strong>品（price=min；gap&gt;10x skip）：wlw.de ~90k + ep.fr ~12k + ep.es ~12k + ep.it ~11k</td><td class="num">~124k（skip 后 ~110k）</td></tr>
-  <tr><td>Phase 3（后续）</td><td>其余 EP 国家域名开新账号（europages.de / .co.uk / .nl / .com 等）：DE ~195k + GB ~69k + TR ~40k + NL ~39k + PL ~33k + PT ~21k + 其他（<strong>含非欧元国家站：GB/CH/SE/PL/TR/CZ/DK/RO/HU/NO 等，货币方案见下表</strong>）</td><td class="num">~490k</td></tr>
-  <tr><td>Phase 4（收尾）</td><td>长 title/desc 字段处理 + 短 title 补全（品牌+型号+品类）</td><td class="num">~28k</td></tr>
-  <tr><td><strong>全量总计</strong></td><td>（第一期 ~805k + Phase 3 ~490k + Phase 4 补全）≈ 覆盖全平台带价品</td><td class="num"><strong>~1,258k</strong></td></tr>
+  <tr><td>Phase 1（第一期 MVP，仅 wlw.de）</td><td>wlw.de 上传<strong>单值价</strong>品 ~478k <strong>（PDP 价格展示依赖上线后启动，见 3.9）</strong></td><td class="num">~478k</td></tr>
+  <tr><td>Phase 2（第一期内）</td><td>wlw.de 上传<strong>区间价</strong>品（price=min；gap&gt;10x skip）~90k</td><td class="num">~90k（skip 后 ~81k）</td></tr>
+  <tr><td>Phase 3（EP GMC 账号审核通过后）</td><td>EP 账号 ep.fr/es/it 上传单值价+区间价：ep.fr ~117k + ep.es ~68k + ep.it ~50k（含双平台品）</td><td class="num">~236k</td></tr>
+  <tr><td>Phase 4（后续）</td><td>其余 EP 国家域名开新账号（europages.de / .co.uk / .nl / .com 等）：DE ~195k + GB ~69k + TR ~40k + NL ~39k + PL ~33k + PT ~21k + 其他（<strong>含非欧元国家站：GB/CH/SE/PL/TR/CZ/DK/RO/HU/NO 等，货币方案见下表</strong>）</td><td class="num">~490k</td></tr>
+  <tr><td>Phase 5（收尾）</td><td>长 title/desc 字段处理 + 短 title 补全（品牌+型号+品类）</td><td class="num">~28k</td></tr>
+  <tr><td><strong>全量总计</strong></td><td>（Phase 1-2 ~569k + Phase 3 ~236k + Phase 4 ~490k + Phase 5 补全）≈ 覆盖全平台带价品</td><td class="num"><strong>~1,258k</strong></td></tr>
 </table>
+
+<h3>2.3 EP 延后原因与 EP 特有风险（2026-08-20）</h3>
+<div class="card">
+  <p><strong>EP 延后原因：</strong>EP GMC 账号（europages.fr/es/it）已创建但<strong>仍在 GMC 账号审核中</strong>——账号未审核通过前无法上传商品。wlw.de 账号已通过并完全配置，因此第一期<strong>仅上线 wlw.de</strong>。</p>
+  <p><strong>仅测 wlw.de 无法覆盖的 EP 特有风险（EP 上线时逐一验证）：</strong></p>
+  <table>
+    <tr><th>#</th><th>EP 风险 / 与 wlw.de 的差异</th><th>量级</th><th>Feed 影响</th></tr>
+    <tr><td>1</td><td>非 EUR 原币（GBP/PLN/TRL/CHF…）需按前端同口径汇率换算 EUR</td><td>EP ~129k（占带价品 19%）vs wlw 25.3k（4.4%）</td><td>价格不一致 → 拒审/错误价格展示；TRL 波动大 → 单独评估或 skip</td></tr>
+    <tr><td>2</td><td>多语言标题/描述（DE/EN/FR/ES/IT…）——EP 品池为欧洲各国供应商</td><td>EP 品池覆盖欧洲各国</td><td>GMC 匹配质量；分语言截断规则</td></tr>
+    <tr><td>3</td><td>各 EP 账号内的域名验证（UC-352）</td><td>Phase 3 的 3 个域名（fr/es/it）+ 后续 10+</td><td>未验证 → link mismatched domain、商品不收录</td></tr>
+    <tr><td>4</td><td>国家站模式：ep.XX 收录可卖到该国的品，品池来自欧洲各国</td><td>ep.fr ~118k / ep.es ~68k / ep.it ~50k 带价品</td><td>品→账号映射正确性（哪些品归哪个 EP 账号）</td></tr>
+    <tr><td>5</td><td>EP PDP URL 模式：<code>/fr/company/{cs}-{cid}/products/{ps}-{pid}</code> — 与 wlw 同构，仅语言路径+域名不同</td><td>全部 EP 品</td><td>低（实测 HTTP 200），上线时按域名逐一复验</td></tr>
+  </table>
+  <p><strong>决策（2026-08-20）：</strong>第一期 = 仅 wlw.de；EP（ep.fr/es/it，~236k 带价品）移至 Phase 3，以 EP GMC 账号审核通过为门槛。wlw.de-only 测试验证核心链路（feed → GMC 收录 → Free Listings → GA4 归因）；上述 EP 风险已登记入风险清单（第 9 章），EP 上线时逐一验证。</p>
+</div>
 
 <p><strong>全量货币设置（2026-08-20 定案方向）：</strong>所有 EP 国家站前端<strong>统一 EUR 展示</strong>（实测：ep.fr PDP “16,00 €”/“32,00 - 40,00 €”；ep.co.uk 站含英国公司品 “55,00 €”/“from 11,69 €”——BEE 4 LIMITED 的 Industrial Labels 库中原币 10 GBP → 前端 “from 11,69 €”，GBP→EUR 换算与 wlw 同机制）→ <strong>feed 全量统一 EUR 提交</strong>，与落地页一致、满足 GMC 三方一致（6324371 / 7052112）；<strong>非欧元国家市场投放（UK/CH/SE/PL…）</strong>：GMC 账号可设多 target country（<a href="https://support.google.com/merchants/answer/14991840" target="_blank">14991840</a>），feed 保持 EUR，Google 官方 <strong>Currency Conversion</strong> 自动按 target country 货币展示（<a href="https://support.google.com/merchants/answer/160637" target="_blank">160637</a> “other currencies may be supported using currency conversion”）→ 无需逐国家换算；<strong>非 EUR 原币品（推全新增 ~129k，占 EP 带价品 ~19%）：</strong>GB 55,008 GBP / PL 30,433 PLN / TR 14,989 TRL / RO 8,977 RON / CZ 5,405 CZK / DK 4,331 DKK / CH 4,899 CHF / HU 4,489 HUF / SE 422 / 其他 ≈129k + wlw.de 25.3k——按前端同口径汇率换算 EUR 提交（与 UI 一致）；TRL 波动大单独评估；或按国家池 skip。EUR 原币品不受影响（非欧元国家品池中 EUR 占比 25-99%，如 GB 29.3% / PL 38.6% / SE 66.8% / BG 98.6%）。</p>
 
@@ -672,7 +705,7 @@ WHERE so.delete_time IS NULL AND so.publish_time IS NOT NULL
   <tr><td>双平台 (wlw+ep)</td><td class="num">146,835</td><td class="num">11.7%</td><td class="num">—</td></tr>
 </table>
 <p class="footnote">* GMC Ready = has price + has title (≤150) + has description (≤5000) + has image. 不含 URL 和 availability.</p>
-<p class="footnote"><strong>europages 按目标销售国家站归属子域（2026-08-20 确认按域名单开账号）：</strong>ep.fr 收录<strong>可卖到法国</strong>的品（品池来自欧洲各国，非仅法国公司）；第一期开 <strong>ep.fr ~124k / ep.es ~77k / ep.it ~51k</strong>（带价品，含双平台）；其余国家（de ~195k / co.uk ~69k / nl ~39k / pl ~33k / pt ~21k 等）≈ 490k 留后续阶段（见 2.2）。</p>
+<p class="footnote"><strong>europages 按目标销售国家站归属子域（2026-08-20 确认按域名单开账号）：</strong>ep.fr 收录<strong>可卖到法国</strong>的品（品池来自欧洲各国，非仅法国公司）；<strong>第一期 = 仅 wlw.de（2026-08-20 更新，EP GMC 账号审核中）；</strong>EP 上线（ep.fr ~118k / ep.es ~68k / ep.it ~50k 带价品，含双平台）移至 Phase 3（见 2.1/2.3）；其余国家（de ~195k / co.uk ~69k / nl ~39k / pl ~33k / pt ~21k 等）≈ 490k 留后续阶段（见 2.2）。</p>
 
 <h3>3.2 GMC 7 个必填字段逐项检视</h3>
 <table>
@@ -969,7 +1002,7 @@ identifier_exists → false (无 brand/GTIN/MPN 时声明)
 <h3>6.4 数据需求清单</h3>
 <table>
   <tr><th>#</th><th>需求项</th><th>归属方</th><th>状态</th></tr>
-  <tr><td>1</td><td>4 个 GMC 账号各开启 organic shopping 自动标记 + 关联 GA4 property（方案 A）</td><td>GMC 账号配置（UC-351 执行方）</td><td><span class="badge yellow">待办 — W34/W35</span></td></tr>
+  <tr><td>1</td><td>wlw.de GMC 账号开启 organic shopping 自动标记 + 关联 GA4 property（方案 A）；EP 账号在 Phase 3 上线时同步</td><td>GMC 账号配置（UC-351 执行方）</td><td><span class="badge yellow">待办 — W34/W35</span></td></tr>
   <tr><td>2</td><td>确认/扩展数仓渠道映射含 organic_shopping（ga_user_metrics + active_buyers 归因）</td><td>数据团队（dbt）</td><td><span class="badge yellow">R1 前确认</span></td></tr>
   <tr><td>3</td><td>（备选）feed link 追加 UTM（方案 B）</td><td>Feed 生成侧</td><td><span class="badge yellow">备选</span></td></tr>
   <tr><td>4</td><td>周度漏斗看板：Shopping UV → AB → AB2（T-3），按账号/域名</td><td>本方案</td><td><span class="badge yellow">待建</span></td></tr>
@@ -982,16 +1015,16 @@ identifier_exists → false (无 brand/GTIN/MPN 时声明)
 <div class="card">
 <h3>目标：AB2 +5（推全）来源拆解</h3>
 <table>
-  <tr><th>指标</th><th>第一期（4 域名 ~805k）</th><th>推全（~1,258k）</th><th>来源</th></tr>
-  <tr><td>第一期 4 域名带价品（wlw.de + ep.it/es/fr）</td><td class="num">~805k</td><td class="num">~1,258k（1.56x）</td><td>Redshift query 2026-08-20</td></tr>
+  <tr><th>指标</th><th>第一期（wlw.de ~569k）</th><th>推全（~1,258k）</th><th>来源</th></tr>
+  <tr><td>第一期 wlw.de 带价品（单值+区间）</td><td class="num">~569k</td><td class="num">~1,258k（2.2x）</td><td>Redshift query 2026-08-20</td></tr>
   <tr><td>Google Shopping Organic CTR (估算)</td><td class="num">~0.5-1.5%</td><td class="num">~0.5-1.5%</td><td>行业 Benchmark (B2B 偏低)</td></tr>
-  <tr><td>日均 Shopping 点击 (估计)</td><td class="num">~4,000-12,100</td><td class="num">~6,300-18,900</td><td>带价品 × CTR</td></tr>
+  <tr><td>日均 Shopping 点击 (估计)</td><td class="num">~2,800-8,500</td><td class="num">~6,300-18,900</td><td>带价品 × CTR</td></tr>
   <tr><td>CVR → AB (参考均值)</td><td class="num">~2-4%</td><td class="num">~2-4%</td><td>SEO 渠道 CVR 基准</td></tr>
-  <tr><td>日均 AB (估计)</td><td class="num">~80-480</td><td class="num">~125-750</td><td></td></tr>
+  <tr><td>日均 AB (估计)</td><td class="num">~56-340</td><td class="num">~125-750</td><td></td></tr>
   <tr><td>AB→AB2 CVR</td><td class="num">~1-3%</td><td class="num">~1-3%</td><td>SEO 渠道 AB→AB2 基准</td></tr>
-  <tr><td>日均 AB2 增量 (估计)</td><td class="num">~0.8-14</td><td class="num">~1.3-22.5</td><td>区间中值 ~5-7</td></tr>
+  <tr><td>日均 AB2 增量 (估计)</td><td class="num">~0.6-10</td><td class="num">~1.3-22.5</td><td>区间中值 ~3.5-5</td></tr>
 </table>
-<p><strong>目标：</strong>第一期 <strong>+3 AB2/日</strong>（区间中值），推全后 <strong>+5 AB2/日</strong>（中值合理偏上）——推全量 1,258k 为第一期的 1.56x，AB2 增量线性外推中值 ≈5.5；+5 兼顾长尾流量与审核波动，既非保守（不设 +1 下限）也不激进（不押上限 22）。上线后 4 周按实际数据调校。</p>
+<p><strong>目标：</strong>第一期（wlw.de）<strong>+3 AB2/日</strong>（区间中值），推全后 <strong>+5 AB2/日</strong>（保守可达）——推全量 1,258k 为第一期 wlw.de（~569k）的 2.2x，AB2 增量线性外推中值 ≈3.5-5 → ≈7.7-11；+5 为保守值（低于线性下限），且不依赖 EP 审核；EP 审核通过后（Phase 3 ~236k）增量在其上叠加。上线后 4 周按实际数据调校。</p>
 </div>
 
 <!-- ==================== 8. 建议执行计划 ==================== -->
@@ -1000,20 +1033,20 @@ identifier_exists → false (无 brand/GTIN/MPN 时声明)
 <table>
   <tr><th>周次</th><th>行动</th><th>产出</th></tr>
   <tr><td>W34 (8/17-23)</td>
-    <td>① 确认 4 个 GMC 账号开通（wlw.de + ep.it/es/fr，<a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a>/<a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a>/<a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a>）<br>② 确认 4 域名验证状态<br>③ 确认 EP 自有 PDP URL 模式</td>
+    <td>① 确认 GMC 账号开通：wlw.de ✅ 已通过并完全配置（2026-08-20）；EP 账号（ep.fr/es/it）已创建但<strong>待 GMC 账号审核</strong>（<a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a>/<a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a>/<a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a>）<br>② 确认 wlw.de 域名验证状态<br>③ 每周跟踪 EP GMC 账号审核进度（Phase 3 门槛，见 2.3）</td>
     <td>前置依赖清单一页</td>
   </tr>
   <tr><td>W35 (8/24-30)</td>
-    <td>① Phase 1 feed 生成 & 上传（4 账号单值价品）<br>② 监控 GMC 审核状态<br>③ 处理 Feed Disapproval</td>
-    <td>4 账号 ~678k 单值价上线</td>
+    <td>① Phase 1 feed 生成 & 上传（wlw.de 单值价品 ~478k）<br>② 监控 GMC 审核状态<br>③ 处理 Feed Disapproval</td>
+    <td>wlw.de ~478k 单值价上线</td>
   </tr>
   <tr><td>W36-W37 (8/31-9/13)</td>
-    <td>① Phase 2 区间价上传（4 账号）<br>② 建立增量更新机制<br>③ Shop Ads 评估（可选）</td>
+    <td>① Phase 2 wlw.de 区间价上传（~90k；gap&gt;10x skip 后 ~81k）<br>② 建立增量更新机制<br>③ Shop Ads 评估（可选）</td>
     <td>区间价商品 + 增量 pipeline</td>
   </tr>
   <tr><td>W38-W40 (9/14-10/4)</td>
-    <td>① Phase 3 其余 EP 域名账号（de/co.uk/nl/com 等）<br>② 数据复盘（4 周后）<br>③ 效果调优</td>
-    <td>全量上线 + 效果报告</td>
+    <td>① Phase 3 EP 账号 ep.fr/es/it（~236k）——EP GMC 账号审核通过后启动<br>② Phase 4 其余 EP 域名账号（de/co.uk/nl/com 等）<br>③ 数据复盘（4 周后）<br>④ 效果调优</td>
+    <td>EP 上线 + 全量 rollout + 效果报告</td>
   </tr>
 </table>
 
@@ -1022,7 +1055,8 @@ identifier_exists → false (无 brand/GTIN/MPN 时声明)
 
 <table>
   <tr><th>风险</th><th>影响</th><th>概率</th><th>缓解措施</th></tr>
-  <tr><td>GMC 账号/域名未验证</td><td>无法上传</td><td>中</td><td>优先确认 4 账号 + 4 域名验证状态（<a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a>/<a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a>/<a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a>）；EP 自有 PDP URL 构造模式已实测确认（见 4.C）</td></tr>
+  <tr><td>GMC 账号/域名未验证</td><td>无法上传</td><td>中</td><td>wlw.de ✅ 已通过并配置完成（第一期不受影响，2026-08-20）；每周跟踪 EP 账号审核（fr/es/it 待审核）；后续阶段域名账号（de/co.uk/nl 等）逐个确认（<a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a>/<a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a>/<a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a>）；EP 自有 PDP URL 构造模式已实测确认（见 4.C）</td></tr>
+  <tr><td><strong>EP 上线延后 — GMC 账号审核仍未通过（2026-08-20 新增）</strong></td><td>EP（ep.fr/es/it ~236k 带价品）无法启动 Phase 3；仅 wlw.de 的第一期不受影响</td><td>高（当前状态：审核中）</td><td>第一期 = 仅 wlw.de（已启动）；EP 特有风险（汇率换算、多语言、域名验证、国家站映射 —— 见 2.3）在 EP 上线时逐一验证；每周复查账号审核状态</td></tr>
   <tr><td>区间价使用 min 触发 Disapproval</td><td>部分商品下架</td><td>低-中</td><td>gap>10x 的 2 万条 review 后决定 skip</td></tr>
   <tr><td><strong>阶梯价 max/min 差倍数过大仍用 min 提交 → 客诉（2026-08-20 新增）</strong></td><td>买家按展示 min 价发起询盘，实际按高阶梯（MOQ 档）成交，价格落差引发客诉/信任问题（B2B 场景敏感）；gap&gt;10x 的 20,769 个已 skip，1.5x-10x 区间价仍用 min</td><td>中</td><td>上线后监测询盘客诉与成交价差；对 gap 较大（如 &gt;3x）档位评估：a) 同步 skip；b) 与产品侧确认改按 max/均值提交；c) UI “ab min €” 已隐含最低价语义，必要时补充阶梯价说明文案</td></tr>
   <tr><td>PDP URL 落地页与价格不匹配</td><td>Disapproval</td><td>中</td><td>确保落地页展示的价格与 feed 一致</td></tr>
@@ -1069,7 +1103,7 @@ WHERE so.delete_time IS NULL
 --           /produkte/{product_slug_id}                 (无 slug, ARISE-1239 fallback, 实测 200)
 </pre>
 
-<h3>第一期 4 域名分布 SQL（2026-08-20）</h3>
+<h3>第一期域名分布 SQL（2026-08-20；第一期 = 仅 wlw.de）</h3>
 <pre>
 -- 按域名账号切分（wlw=true 全部归 wlw.de；EP 按目标销售国家站归 ep.XX（收录可卖到该国的品，品池来自欧洲各国）；ep 仅计非 wlw 品避免重复）
 SELECT CASE WHEN cc.platform_wlw THEN 'wlw.de'
@@ -1083,7 +1117,7 @@ WHERE so.delete_time IS NULL AND so.publish_time IS NOT NULL
   AND so.data_price_min IS NOT NULL AND so.data_price_min > 0
   AND (cc.platform_wlw OR (cc.platform_ep AND cc.country IN ('FR','ES','IT')))
 GROUP BY 1, 2;
--- 第一期合计 804,530 带价品（单值 fixed+from ~678k + 区间 range ~124k，gap>10x skip 后 ~110k）
+-- 第一期（仅 wlw.de）568,945 带价品（单值 ~478k + 区间 ~90k，gap>10x skip 后 ~81k）；EP fr/es/it ~236k 移至 Phase 3（EP GMC 账号审核通过后，见 2.2/2.3）
 </pre>
 
 <h3>数据验证 SQL 脚本</h3>
