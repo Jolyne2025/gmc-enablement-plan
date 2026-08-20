@@ -55,13 +55,41 @@
 <table>
   <tr><th>依赖</th><th>说明</th><th>状态</th></tr>
   <tr><td><a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a></td><td>GMC 账号开通 / 配置——<strong>按域名单开账号（2026-08-20 确认）：第一期 4 个账号 = wlw.de + europages.it / europages.es / europages.fr，各自独立 feed、独立 target country（DE/FR/ES/IT，全部欧元区，统一 EUR）</strong></td><td><span class="badge yellow">待确认</span></td></tr>
-  <tr><td><a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a></td><td><strong>GMC 域名验证（含 EP 域名验证，2026-08-20 合并）</strong>——第一期 4 域名（wlw.de + europages.it + europages.es + europages.fr），各账号验证各自域名；GMC 要求 feed 中 <code>link</code> 指向的域名必须在<strong>该域名自己的账号</strong>内完成“验证 + 声明”（verify and claim website）：每个 EP 域名开独立账号、各自验证各自域名；EP 域名按目标销售国家站归属（<strong>国家站模式，2026-08-20 确认：ep.fr 收录可卖到法国的品，品池来自欧洲各国、非仅法国公司；ep.fr ~124k / ep.es ~77k / ep.it ~51k，量级见 4.1</strong>）；未验证 → link 报 mismatched domain、商品不收录。链路：先确认 EP 自有 PDP URL 模式（见 3.C）→ 各账号完成域名验证 → 各域名品即可上传；其余 EP 国家域名（de ~195k / co.uk ~69k / nl ~39k 等 ≈ 490k）后续阶段再开账号</td><td><span class="badge yellow">待确认</span></td></tr>
+  <tr><td><a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a></td><td><strong>GMC 域名验证（含 EP 域名验证，2026-08-20 合并）</strong>——第一期 4 域名（wlw.de + europages.it + europages.es + europages.fr），各账号验证各自域名；GMC 要求 feed 中 <code>link</code> 指向的域名必须在<strong>该域名自己的账号</strong>内完成“验证 + 声明”（verify and claim website）：每个 EP 域名开独立账号、各自验证各自域名；EP 域名按目标销售国家站归属（<strong>国家站模式，2026-08-20 确认：ep.fr 收录可卖到法国的品，品池来自欧洲各国、非仅法国公司；ep.fr ~124k / ep.es ~77k / ep.it ~51k，量级见 2.1</strong>）；未验证 → link 报 mismatched domain、商品不收录。链路：先确认 EP 自有 PDP URL 模式（见 4.C）→ 各账号完成域名验证 → 各域名品即可上传；其余 EP 国家域名（de ~195k / co.uk ~69k / nl ~39k 等 ≈ 490k）后续阶段再开账号</td><td><span class="badge yellow">待确认</span></td></tr>
   <tr><td><a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a></td><td>GMC Feed 配置基础建设</td><td><span class="badge yellow">待确认</span></td></tr>
     <tr><td>Feed 更新机制</td><td>增量更新 / 全量刷新的方案设计</td><td><span class="badge yellow">需技术设计</span></td></tr>
 </table>
 
-<!-- ==================== 2. 数据全景 ==================== -->
-<h2>2. 数据全景分析</h2>
+<!-- ==================== 2. 实施范围 ==================== -->
+<h2>2. 实施范围</h2>
+
+<h3>2.1 第一期 Scope（4 个 GMC 账号，2026-08-20 按域名切分）</h3>
+<table>
+  <tr><th>GMC 账号（域名）</th><th>带价品</th><th>GMC Ready*</th><th>其中单值价（Phase 1 先传）</th><th>区间价（Phase 2）</th></tr>
+  <tr><td><strong>wlw.de</strong>（wlw=true 全部）</td><td class="num">568,945</td><td class="num">567,428</td><td class="num">477,828</td><td class="num">89,600</td></tr>
+  <tr><td><strong>europages.fr</strong>（可卖到法国的品）</td><td class="num">117,962</td><td class="num">116,792</td><td class="num">105,186</td><td class="num">11,606</td></tr>
+  <tr><td><strong>europages.es</strong>（可卖到西班牙的品）</td><td class="num">68,091</td><td class="num">67,842</td><td class="num">56,161</td><td class="num">11,681</td></tr>
+  <tr><td><strong>europages.it</strong>（可卖到意大利的品）</td><td class="num">49,532</td><td class="num">49,481</td><td class="num">38,684</td><td class="num">10,797</td></tr>
+  <tr><td><strong>第一期合计</strong></td><td class="num"><strong>804,530</strong></td><td class="num"><strong>801,543</strong></td><td class="num"><strong>~678k</strong></td><td class="num"><strong>~124k</strong></td></tr>
+</table>
+<p class="footnote">* GMC Ready = has price + has title (≤150) + has description (≤5000) + has image（Redshift 2026-08-20）。EP 域名按目标销售国家站归属（<strong>国家站模式，2026-08-20 确认：ep.XX 收录可卖到该国的品，品池来自欧洲各国、非仅该国公司</strong>）；ep.fr/es/it 仅计非 wlw 品（双平台品已在 wlw.de 账号），4 账号间无重复。区间价 gap&gt;10x skip 后 ~110k。</p>
+
+<p><strong>第一期选品逻辑：</strong>4 个账号（域名）并行，各账号先传<strong>单值价</strong>品（Phase 1，~678k）→ 再传<strong>区间价</strong>品（Phase 2，~124k）。</p>
+
+<h3>2.2 发布阶段（按域名账号）</h3>
+<table>
+  <tr><th>阶段</th><th>Scope</th><th>预估量级</th></tr>
+  <tr><td>Phase 1（第一期 MVP）</td><td>4 账号各传<strong>单值价</strong>品：wlw.de ~478k + ep.fr ~105k + ep.es ~56k + ep.it ~39k <strong>（PDP 价格展示依赖上线后启动，见 3.9）</strong></td><td class="num">~678k</td></tr>
+  <tr><td>Phase 2（第一期内）</td><td>4 账号各传<strong>区间价</strong>品（price=min；gap&gt;10x skip）：wlw.de ~90k + ep.fr ~12k + ep.es ~12k + ep.it ~11k</td><td class="num">~124k（skip 后 ~110k）</td></tr>
+  <tr><td>Phase 3（后续）</td><td>其余 EP 国家域名开新账号（europages.de / .co.uk / .nl / .com 等）：DE ~195k + GB ~69k + TR ~40k + NL ~39k + PL ~33k + PT ~21k + 其他（<strong>含非欧元国家站：GB/CH/SE/PL/TR/CZ/DK/RO/HU/NO 等，货币方案见下表</strong>）</td><td class="num">~490k</td></tr>
+  <tr><td>Phase 4（收尾）</td><td>长 title/desc 字段处理 + 短 title 补全（品牌+型号+品类）</td><td class="num">~28k</td></tr>
+  <tr><td><strong>全量总计</strong></td><td>（第一期 ~805k + Phase 3 ~490k + Phase 4 补全）≈ 覆盖全平台带价品</td><td class="num"><strong>~1,258k</strong></td></tr>
+</table>
+
+<p><strong>全量货币设置（2026-08-20 定案方向）：</strong>所有 EP 国家站前端<strong>统一 EUR 展示</strong>（实测：ep.fr PDP “16,00 €”/“32,00 - 40,00 €”；ep.co.uk 站含英国公司品 “55,00 €”/“from 11,69 €”——BEE 4 LIMITED 的 Industrial Labels 库中原币 10 GBP → 前端 “from 11,69 €”，GBP→EUR 换算与 wlw 同机制）→ <strong>feed 全量统一 EUR 提交</strong>，与落地页一致、满足 GMC 三方一致（6324371 / 7052112）；<strong>非欧元国家市场投放（UK/CH/SE/PL…）</strong>：GMC 账号可设多 target country（<a href="https://support.google.com/merchants/answer/14991840" target="_blank">14991840</a>），feed 保持 EUR，Google 官方 <strong>Currency Conversion</strong> 自动按 target country 货币展示（<a href="https://support.google.com/merchants/answer/160637" target="_blank">160637</a> “other currencies may be supported using currency conversion”）→ 无需逐国家换算；<strong>非 EUR 原币品（推全新增 ~129k，占 EP 带价品 ~19%）：</strong>GB 55,008 GBP / PL 30,433 PLN / TR 14,989 TRL / RO 8,977 RON / CZ 5,405 CZK / DK 4,331 DKK / CH 4,899 CHF / HU 4,489 HUF / SE 422 / 其他 ≈129k + wlw.de 25.3k——按前端同口径汇率换算 EUR 提交（与 UI 一致）；TRL 波动大单独评估；或按国家池 skip。EUR 原币品不受影响（非欧元国家品池中 EUR 占比 25-99%，如 GB 29.3% / PL 38.6% / SE 66.8% / BG 98.6%）。</p>
+
+<!-- ==================== 3. 数据全景 ==================== -->
+<h2>3. 数据全景分析</h2>
 
 <div class="flex">
   <div class="stat"><div class="value">3,495,171</div><div class="label">在线活跃 Offer</div></div>
@@ -70,7 +98,7 @@
   <div class="stat warn-stat"><div class="value">7,194</div><div class="label">字段需处理 (0.6%)</div></div>
 </div>
 
-<h3>2.1 平台分布 (有价格 Offer)</h3>
+<h3>3.1 平台分布 (有价格 Offer)</h3>
 <table>
   <tr><th>平台</th><th>有价格 Offer</th><th>占比</th><th>GMC Ready*</th></tr>
   <tr><td>wlw.de (wlw=true)</td><td class="num">568,187</td><td class="num">45.2%</td><td class="num">566,668 (99.7%)</td></tr>
@@ -78,21 +106,21 @@
   <tr><td>双平台 (wlw+ep)</td><td class="num">146,835</td><td class="num">11.7%</td><td class="num">—</td></tr>
 </table>
 <p class="footnote">* GMC Ready = has price + has title (≤150) + has description (≤5000) + has image. 不含 URL 和 availability.</p>
-<p class="footnote"><strong>europages 按目标销售国家站归属子域（2026-08-20 确认按域名单开账号）：</strong>ep.fr 收录<strong>可卖到法国</strong>的品（品池来自欧洲各国，非仅法国公司）；第一期开 <strong>ep.fr ~124k / ep.es ~77k / ep.it ~51k</strong>（带价品，含双平台）；其余国家（de ~195k / co.uk ~69k / nl ~39k / pl ~33k / pt ~21k 等）≈ 490k 留后续阶段（见 4.2）。</p>
+<p class="footnote"><strong>europages 按目标销售国家站归属子域（2026-08-20 确认按域名单开账号）：</strong>ep.fr 收录<strong>可卖到法国</strong>的品（品池来自欧洲各国，非仅法国公司）；第一期开 <strong>ep.fr ~124k / ep.es ~77k / ep.it ~51k</strong>（带价品，含双平台）；其余国家（de ~195k / co.uk ~69k / nl ~39k / pl ~33k / pt ~21k 等）≈ 490k 留后续阶段（见 2.2）。</p>
 
-<h3>2.2 GMC 7 个必填字段逐项检视</h3>
+<h3>3.2 GMC 7 个必填字段逐项检视</h3>
 <table>
   <tr><th>#</th><th>GMC 字段</th><th>覆盖率</th><th>状态</th><th>说明</th></tr>
   <tr><td>1</td><td><strong>id</strong></td><td class="num">100%</td><td><span class="badge green">✅</span></td><td>offer UUID，3,495,171 个全部有</td></tr>
-  <tr><td>2</td><td><strong>title</strong> (≤150)</td><td class="num">100% / 99.96%</td><td><span class="badge green">✅</span></td><td>avg 44 chars; 1,428 个 >150 需 truncate;<br>&lt;10 chars 仅 7,862 个 (0.62%)，建议设下限（见 2.5）</td></tr>
-  <tr><td>3</td><td><strong>description</strong> (≤5000)</td><td class="num">~100% / 99.8%</td><td><span class="badge green">✅</span></td><td>avg 823 chars; 6,249 个 >5000 需 truncate;<br>&lt;50 chars 仅 61,148 个 (4.9%)，建议设下限（见 2.5）</td></tr>
-  <tr><td>4</td><td><strong>link</strong></td><td class="num">100% 可构造</td><td><span class="badge green">✅</span></td><td>slug_id 100% 覆盖 → 构造 wlw.de 自有 PDP URL（详见 2.6）;<br>data_external_url (87.5%) 是商家独立站链接，<strong>不适用</strong>（自引流）</td></tr>
+  <tr><td>2</td><td><strong>title</strong> (≤150)</td><td class="num">100% / 99.96%</td><td><span class="badge green">✅</span></td><td>avg 44 chars; 1,428 个 >150 需 truncate;<br>&lt;10 chars 仅 7,862 个 (0.62%)，建议设下限（见 3.5）</td></tr>
+  <tr><td>3</td><td><strong>description</strong> (≤5000)</td><td class="num">~100% / 99.8%</td><td><span class="badge green">✅</span></td><td>avg 823 chars; 6,249 个 >5000 需 truncate;<br>&lt;50 chars 仅 61,148 个 (4.9%)，建议设下限（见 3.5）</td></tr>
+  <tr><td>4</td><td><strong>link</strong></td><td class="num">100% 可构造</td><td><span class="badge green">✅</span></td><td>slug_id 100% 覆盖 → 构造 wlw.de 自有 PDP URL（详见 3.6）;<br>data_external_url (87.5%) 是商家独立站链接，<strong>不适用</strong>（自引流）</td></tr>
   <tr><td>5</td><td><strong>image_link</strong></td><td class="num">99.8%</td><td><span class="badge green">✅</span></td><td>3,489,619 个有至少一张图片</td></tr>
   <tr><td>6</td><td><strong>price</strong></td><td class="num">36.0%</td><td><span class="badge yellow">⚠️</span></td><td>17.1% 是区间价 (min≠max), 需决策</td></tr>
   <tr><td>7</td><td><strong>availability</strong></td><td class="num">0%</td><td><span class="badge red">❌</span></td><td>无库存追踪; 建议全部 fallback in_stock</td></tr>
 </table>
 
-<h3>2.3 价格格式深度分析</h3>
+<h3>3.3 价格格式深度分析</h3>
 <table>
   <tr><th>价格类型</th><th>数量</th><th>占带价品</th><th>GMC 赋值策略</th></tr>
   <tr><td>price_min 唯一 (无 max)</td><td class="num">1,042,377</td><td class="num">82.9%</td><td>直接使用 price_min</td></tr>
@@ -112,7 +140,7 @@
   <tr><td><strong>合计</strong></td><td class="num"><strong>214,637</strong></td><td class="num">100%</td><td></td></tr>
 </table>
 
-<h3>2.4 货币分布</h3>
+<h3>3.4 货币分布</h3>
 <table>
   <tr><th>货币</th><th>数量</th><th>占比</th></tr>
   <tr><td>EUR</td><td class="num">1,117,314</td><td class="num">88.8%</td></tr>
@@ -122,8 +150,8 @@
   <tr><td>其他 (TRY/RON/CZK/HUF/DKK/SEK...)</td><td class="num">38,388</td><td class="num">3.0%</td></tr>
 </table>
 
-<!-- ==================== 2.5 数据质量验证 ==================== -->
-<h3>2.5 抽样验证与脏数据排查（2026-08-20）</h3>
+<!-- ==================== 3.5 数据质量验证 ==================== -->
+<h3>3.5 抽样验证与脏数据排查（2026-08-20）</h3>
 
 <p>随机抽样 30 条有价格 Offer 人工检查：<strong>数据整体真实可信</strong>，覆盖真实商品（如妇科检查床 £3,288、HECO 螺钉 €2.40、储料架 £925），供应商名称/价格/货币/外部 URL 相互匹配。但发现以下需在 feed 生成时清洗的异常：</p>
 
@@ -148,8 +176,8 @@
   </ol>
 </div>
 
-<!-- ==================== 2.6 link 字段专项验证 ==================== -->
-<h3>2.6 link 字段专项验证：自有 PDP URL 构造（2026-08-20）</h3>
+<!-- ==================== 3.6 link 字段专项验证 ==================== -->
+<h3>3.6 link 字段专项验证：自有 PDP URL 构造（2026-08-20）</h3>
 
 <div class="card">
   <p><strong>结论：link 字段能力 = 100% 可构造，实测全部可访问。</strong>GMC link 必须是 wlw.de 自有 PDP URL（我们在给自己引流，而不是导流到商家独立站）。数据表里 87.5% 的 <code>data_external_url</code> 指向商家外部网站（如 <code>supplier-shop.com/product/xyz</code>），对 GMC 无意义；自有 PDP URL 通过 slug_id 构造，覆盖无死角。</p>
@@ -175,11 +203,11 @@
     <tr><td><a href="https://www.wlw.de/de/firma/280744/produkte/35874570" target="_blank"><code>/firma/280744/produkte/35874570</code></a>（公司 slug 完全缺失）</td><td><span class="badge red">HTTP 404</span></td><td>公司段必须非空（任一 slug + 正确 id 即可）</td></tr>
   </table>
 
-  <p><strong>europages 侧（第一期 3 个 EP 域名账号，见 4.1）：</strong><code>europages.ep_products.prd_url</code>（87.5% 覆盖）同样是商家外部站链接（如 ringoplast.de），不可直接使用；EP 自有 PDP URL 构造模式<strong>已实测确认</strong>（见 3.C：<code>/fr/company/{公司slug}-{公司slug_id}/products/{产品slug}-{产品slug_id}</code>，产品段可降级 <code>/products/{slug_id}</code>）。</p>
+  <p><strong>europages 侧（第一期 3 个 EP 域名账号，见 2.1）：</strong><code>europages.ep_products.prd_url</code>（87.5% 覆盖）同样是商家外部站链接（如 ringoplast.de），不可直接使用；EP 自有 PDP URL 构造模式<strong>已实测确认</strong>（见 4.C：<code>/fr/company/{公司slug}-{公司slug_id}/products/{产品slug}-{产品slug_id}</code>，产品段可降级 <code>/products/{slug_id}</code>）。</p>
 </div>
 
-<!-- ==================== 2.7 线上对照验证 ==================== -->
-<h3>2.7 线上对照验证：有价格品 UI + JSON-LD 双展示，与数据库三方一致（2026-08-20 复核修正）</h3>
+<!-- ==================== 3.7 线上对照验证 ==================== -->
+<h3>3.7 线上对照验证：有价格品 UI + JSON-LD 双展示，与数据库三方一致（2026-08-20 复核修正）</h3>
 
 <div class="card">
   <p><strong>背景（2026-08-20 复核修正）：</strong>此前抽查误用短路径 <code>/produkte/{slug_id}</code>（实为<strong>商品列表页</strong>，非 PDP 详情页），得出“UI 不显示价格”的错误结论。经线上对照复核（用户指正 + curl 原始 HTML 逐一验证，改用完整详情页模式 <code>/firma/{公司slug}-{slug_id}/produkte/{产品slug}-{slug_id}</code>），<strong>有价格品 UI 正常展示价格</strong>，与数据库 / JSON-LD 三方一致：</p>
@@ -194,16 +222,16 @@
 
   <p><strong>结论：</strong></p>
   <ul>
-    <li><strong>数据层价格真实：</strong>36% 带价品占比成立（2.5 节已随机抽样 30 条验证）；线上随机找产品看不到价格是常态——64% 无价格品（页面确认无价格），有价格品则在 UI 正常展示（见 ②）</li>
+    <li><strong>数据层价格真实：</strong>36% 带价品占比成立（3.5 节已随机抽样 30 条验证）；线上随机找产品看不到价格是常态——64% 无价格品（页面确认无价格），有价格品则在 UI 正常展示（见 ②）</li>
     <li><strong>复核修正（2026-08-20）：wlw PDP 有价格品 UI 正常展示价格，JSON-LD 同步输出，三方一致：</strong>有价格品 → UI 主价格区（<code>data-test="product-price"</code>）显示 “ab 119 €” / “8.212,50 €” / range 品 “90,45 - 166,84 €”（min 在首位最显眼），同时 <code>Product.offers.price</code> 输出且与数据库一致（119=119、8212.5=8.212,50…）；无价格品 → UI 无主价格区、JSON-LD 无 offers（页面其他 € 均为推荐产品）。<strong>此前“UI 不显示价格”结论错误</strong>——源于抽查误用短路径 <code>/produkte/{slug_id}</code>（商品列表页），正确详情页模式为 <code>/firma/{公司slug}-{slug_id}/produkte/{产品slug}-{slug_id}</code></li>
-    <li><strong>GMC 影响：</strong>① 落地页 UI 展示价格 + 结构化价格均与 feed 一致 → <strong>price mismatch disapproval 风险极低</strong>；② 落地页 availability 输出 InStock，与 feed 统一 in_stock 方案吻合；③ <strong>官方 Landing page requirements “clearly show the product price” 已满足</strong>（UI 展示 “ab min €”），此前的合规缺口消除（见 2.9）；④ ⚠️ <strong>新风险：非 EUR 币种 UI 按 EUR 换算展示</strong>（见 ⑤）</li>
-    <li><strong>⚠️ 非 EUR 币种换算风险（2026-08-20 新发现，含 GMC 货币规则查证）：</strong>wlw 带价品中 EUR 545,964（95.6%），非 EUR ≈ 25,344（4.4%，CHF 21,055 + GBP 3,803 + SEK 413 等）——UI 主价格区按汇率换算成 EUR 显示（实测 2.08 GBP → “2,43 €”），JSON-LD / 数据库为原币种；<strong>EP 三账号品池几乎全 EUR（Redshift 2026-08-20）：ep.fr 140,401/193（99.86%）、ep.es 80,652/14（99.98%）、ep.it 59,453/49（99.93%）→ 非 EUR 仅 ~256 个</strong>，且 ep.fr 前端实测默认 EUR 展示（PDP “16,00 €”、showroom “130,00 - 150,00 €”，与 wlw 同构含汇率机制）；<strong>推全新增非 EUR 原币品 ~129k（GB 55,008 GBP / PL 30,433 PLN / TR 14,989 TRL 等，占 EP 带价品 ~19%）</strong>——ep.co.uk 站实测：英国公司 BEE 4 LIMITED 的 Industrial Labels 库中 10 GBP → 前端 “from 11,69 €”（GBP→EUR 换算，与 wlw 同机制）→ 推全时非 EUR 原币品同样按前端汇率换算 EUR 提交（见 4.2 全量货币设置）。<strong>GMC 货币规则（官方）：</strong>① feed 的 price 必须含 ISO 4217 货币代码（[price] 属性 <a href="https://support.google.com/merchants/answer/6324371" target="_blank">6324371</a>）；② 金额与币种必须与落地页 / 结构化数据 / checkout <strong>三方一致</strong>（产品数据规范 <a href="https://support.google.com/merchants/answer/7052112" target="_blank">7052112</a> + mismatch 修复 <a href="https://support.google.com/merchants/answer/9773429" target="_blank">9773429</a>）——币种不一致 → price mismatch disapproval；③ 官方按 target country 列支持货币（<a href="https://support.google.com/merchants/answer/160637" target="_blank">160637</a>），非目标国货币可经官方 <strong>Currency Conversion</strong> 换算支持（多 target country 见 <a href="https://support.google.com/merchants/answer/14991840" target="_blank">14991840</a>），但本地货币提交表现更优；④ <strong>落地页按访客位置自动切换货币 + feed 固定货币 = mismatch 高危</strong>（官方自动换算限制 <a href="https://support.google.com/merchants/answer/6150127" target="_blank">6150127</a>，Shopify 社区实测：落地页自动货币换算须禁用）。<strong>wlw/EP 侧实证：</strong>页面货币选择器默认 EUR（2026-08-20 截图），URL 无货币参数（<code>/de/</code>、<code>/fr/</code>、<code>/en/</code> 固定），非 EUR 原币品 UI 一律 EUR 换算展示（wlw 2.08 GBP → “2,43 €”；EP 10 GBP → “from 11,69 €”）→ <strong>前端展示货币统一为 EUR</strong>。→ <strong>结论：全量账号 feed 统一按 EUR 提交</strong>（非 EUR 原币按 wlw/EP 同口径汇率换算），与各站 UI 默认展示一致、符合三方一致规则；不建议原币提交（UI 展示 EUR → 币种必 mismatch）。待确认：货币选择器是否按访客地区自动变（若会，Google 爬虫可能抓到非默认货币版本，见 2.9 行动）</li>
+    <li><strong>GMC 影响：</strong>① 落地页 UI 展示价格 + 结构化价格均与 feed 一致 → <strong>price mismatch disapproval 风险极低</strong>；② 落地页 availability 输出 InStock，与 feed 统一 in_stock 方案吻合；③ <strong>官方 Landing page requirements “clearly show the product price” 已满足</strong>（UI 展示 “ab min €”），此前的合规缺口消除（见 3.9）；④ ⚠️ <strong>新风险：非 EUR 币种 UI 按 EUR 换算展示</strong>（见 ⑤）</li>
+    <li><strong>⚠️ 非 EUR 币种换算风险（2026-08-20 新发现，含 GMC 货币规则查证）：</strong>wlw 带价品中 EUR 545,964（95.6%），非 EUR ≈ 25,344（4.4%，CHF 21,055 + GBP 3,803 + SEK 413 等）——UI 主价格区按汇率换算成 EUR 显示（实测 2.08 GBP → “2,43 €”），JSON-LD / 数据库为原币种；<strong>EP 三账号品池几乎全 EUR（Redshift 2026-08-20）：ep.fr 140,401/193（99.86%）、ep.es 80,652/14（99.98%）、ep.it 59,453/49（99.93%）→ 非 EUR 仅 ~256 个</strong>，且 ep.fr 前端实测默认 EUR 展示（PDP “16,00 €”、showroom “130,00 - 150,00 €”，与 wlw 同构含汇率机制）；<strong>推全新增非 EUR 原币品 ~129k（GB 55,008 GBP / PL 30,433 PLN / TR 14,989 TRL 等，占 EP 带价品 ~19%）</strong>——ep.co.uk 站实测：英国公司 BEE 4 LIMITED 的 Industrial Labels 库中 10 GBP → 前端 “from 11,69 €”（GBP→EUR 换算，与 wlw 同机制）→ 推全时非 EUR 原币品同样按前端汇率换算 EUR 提交（见 2.2 全量货币设置）。<strong>GMC 货币规则（官方）：</strong>① feed 的 price 必须含 ISO 4217 货币代码（[price] 属性 <a href="https://support.google.com/merchants/answer/6324371" target="_blank">6324371</a>）；② 金额与币种必须与落地页 / 结构化数据 / checkout <strong>三方一致</strong>（产品数据规范 <a href="https://support.google.com/merchants/answer/7052112" target="_blank">7052112</a> + mismatch 修复 <a href="https://support.google.com/merchants/answer/9773429" target="_blank">9773429</a>）——币种不一致 → price mismatch disapproval；③ 官方按 target country 列支持货币（<a href="https://support.google.com/merchants/answer/160637" target="_blank">160637</a>），非目标国货币可经官方 <strong>Currency Conversion</strong> 换算支持（多 target country 见 <a href="https://support.google.com/merchants/answer/14991840" target="_blank">14991840</a>），但本地货币提交表现更优；④ <strong>落地页按访客位置自动切换货币 + feed 固定货币 = mismatch 高危</strong>（官方自动换算限制 <a href="https://support.google.com/merchants/answer/6150127" target="_blank">6150127</a>，Shopify 社区实测：落地页自动货币换算须禁用）。<strong>wlw/EP 侧实证：</strong>页面货币选择器默认 EUR（2026-08-20 截图），URL 无货币参数（<code>/de/</code>、<code>/fr/</code>、<code>/en/</code> 固定），非 EUR 原币品 UI 一律 EUR 换算展示（wlw 2.08 GBP → “2,43 €”；EP 10 GBP → “from 11,69 €”）→ <strong>前端展示货币统一为 EUR</strong>。→ <strong>结论：全量账号 feed 统一按 EUR 提交</strong>（非 EUR 原币按 wlw/EP 同口径汇率换算），与各站 UI 默认展示一致、符合三方一致规则；不建议原币提交（UI 展示 EUR → 币种必 mismatch）。待确认：货币选择器是否按访客地区自动变（若会，Google 爬虫可能抓到非默认货币版本，见 3.9 行动）</li>
     <li><strong>availability 审核结论（2026-08-20 补充）：</strong>① <strong>会被审核</strong>——feed 层必填（已达标）+ 落地页层一致性检查：页面显示的实际库存状态与 feed 矛盾（页面“可加购”但 feed 标 out of stock，或页面“售罄”但 feed 标 in stock）→ mismatch disapproval（官方 Inaccurate availability status 文档 <a href="https://support.google.com/merchants/answer/9773127" target="_blank">9773127</a> 专项处理）；页面<strong>不显示</strong>库存状态 → 不构成 mismatch（与 price 同逻辑）；② <strong>UI 非硬性</strong>——Landing page requirements 只硬性要求价格 “clearly show”，未要求 UI 显示“有货”状态；但 UI 一旦显示任何库存状态（标签/按钮态），必须与 feed 一致，否则 mismatch；③ <strong><a href="https://www.seroundtable.com/google-merchant-center-out-of-stock-41100.html" target="_blank">2026-03-26 Google 更新 Landing page requirements</a></strong>（SERoundtable 报道）：“products can successfully be added to a cart and delivered to a customer”；“out of stock 商品落地页 Buy 按钮必须置灰”（隐藏/可点击均不允许）——对 wlw 询价制（无 Buy 按钮）强化了“不可直接购买”的实质风险（与 2.9 结论互相印证）；④ <strong>结构化数据必须写且与 feed 一致</strong>：官方 price/availability mismatch 修复文档（<a href="https://support.google.com/merchants/answer/9773429" target="_blank">9773429</a>）明确要求 price 与 availability 与页面 schema markup 对齐——biz-seo-sdk 已输出 offers.availability=InStock，与 feed 统一 in_stock 吻合，<strong>无需新开发</strong>；⚠️ 反向约束：若未来上线缺货品，feed + JSON-LD + UI 三方必须同步改为真实状态，否则构成 Inaccurate availability 违规。</li>
   </ul>
 </div>
 
-<!-- ==================== 2.8 竞品调研 ==================== -->
-<h3>2.8 竞品调研：B2B 阶梯价在购物渠道的展示（2026-08-20）</h3>
+<!-- ==================== 3.8 竞品调研 ==================== -->
+<h3>3.8 竞品调研：B2B 阶梯价在购物渠道的展示（2026-08-20）</h3>
 
 <div class="card">
   <p><strong>背景：</strong>评估“区间价产品 feed 提交 min 还是 max”时，实际调研同类 B2B 平台（Made-in-China）在购物渠道的展示方式（Google Shopping 反爬 → Bing Shopping 实况 + 实站验证）。</p>
@@ -218,11 +246,11 @@
   <p><strong>结论：</strong>① B2B 平台行业通行做法 = feed 提交并展示 <strong>min（最低价）</strong>，且页面 JSON-LD 亦输出 min——feed 用 min 与落地页完全一致（零 mismatch）；② 用 max（MOQ 档单价）与行业实践相反，且与页面 JSON-LD 不一致 → 必然 mismatch；③ 落地页 UI 显示阶梯价表（含 min）是行业标配，min 必须对用户可见。</p>
 </div>
 
-<!-- ==================== 2.9 PDP 价格展示必要性 ==================== -->
-<h3>2.9 PDP 价格展示合规（官方 Landing Page Requirements，2026-08-20 复核修正）</h3>
+<!-- ==================== 3.9 PDP 价格展示必要性 ==================== -->
+<h3>3.9 PDP 价格展示合规（官方 Landing Page Requirements，2026-08-20 复核修正）</h3>
 
 <div class="card">
-  <p><strong>问题（2026-08-20 复核修正）：</strong>wlw PDP UI 是否满足官方 “clearly show the product price” 硬性要求？此前结论“UI 不渲染价格”已被 2.7 复核推翻——<strong>有价格品 UI 正常展示（“ab 119 €”等格式）</strong>。剩余合规风险：① 询价制“不可直接购买”② 非 EUR 币种 UI 换算 EUR 展示 vs feed 原币种。</p>
+  <p><strong>问题（2026-08-20 复核修正）：</strong>wlw PDP UI 是否满足官方 “clearly show the product price” 硬性要求？此前结论“UI 不渲染价格”已被 3.7 复核推翻——<strong>有价格品 UI 正常展示（“ab 119 €”等格式）</strong>。剩余合规风险：① 询价制“不可直接购买”② 非 EUR 币种 UI 换算 EUR 展示 vs feed 原币种。</p>
 
   <table>
     <tr><th>来源</th><th>要点</th></tr>
@@ -231,13 +259,13 @@
     <tr><td>price 属性定义（<a href="https://support.google.com/merchants/answer/6324371" target="_blank">6324371</a>）</td><td>“Submit an amount and currency that match the price on your landing page and the checkout pages”；变体价格场景：“different prices for each of these variants”（多规格多价可拆分为变体处理）</td></tr>
   </table>
 
-  <p><strong>结论（复核后）：</strong>① <strong>官方硬性要求已满足</strong>——wlw 有价格品 PDP UI 主价格区展示 “ab min €”（range 品显示 “min - max €”，min 在首位最显眼），符合 “clearly show” + “advertised product price must be the most prominent”；无价格品因数据库本身无价（64%），不涉及展示义务；② feed 用 <strong>min</strong> 与 UI / JSON-LD 三方一致（EUR 品实测 119=119、8212.5=8.212,50 €）→ <strong>price mismatch 风险极低</strong>；③ <strong>询价制“不可直接购买”风险独立保留</strong>——官方要求 “products can successfully be added to a cart and delivered”（2026-03-26 更新）与论坛结论（107143830：无价格 + 不可直接购买 → 不能使用 GMC）依旧适用，这是本方案第一大风险（与 2.7 availability 结论互相印证）；④ ⚠️ <strong>非 EUR 币种换算风险（新）</strong>——UI 将 CHF/GBP/SEK 等（~25.3k，4.4%）按汇率换算成 EUR 展示（实测 2.08 GBP → “2,43 €”），JSON-LD/数据库为原币；feed 需决定币种口径（见行动）。</p>
+  <p><strong>结论（复核后）：</strong>① <strong>官方硬性要求已满足</strong>——wlw 有价格品 PDP UI 主价格区展示 “ab min €”（range 品显示 “min - max €”，min 在首位最显眼），符合 “clearly show” + “advertised product price must be the most prominent”；无价格品因数据库本身无价（64%），不涉及展示义务；② feed 用 <strong>min</strong> 与 UI / JSON-LD 三方一致（EUR 品实测 119=119、8212.5=8.212,50 €）→ <strong>price mismatch 风险极低</strong>；③ <strong>询价制“不可直接购买”风险独立保留</strong>——官方要求 “products can successfully be added to a cart and delivered”（2026-03-26 更新）与论坛结论（107143830：无价格 + 不可直接购买 → 不能使用 GMC）依旧适用，这是本方案第一大风险（与 3.7 availability 结论互相印证）；④ ⚠️ <strong>非 EUR 币种换算风险（新）</strong>——UI 将 CHF/GBP/SEK 等（~25.3k，4.4%）按汇率换算成 EUR 展示（实测 2.08 GBP → “2,43 €”），JSON-LD/数据库为原币；feed 需决定币种口径（见行动）。</p>
   <p><strong>行动（复核后更新）：</strong>① <strong>移除原“PDP 前端展示价格”新增依赖</strong>（2026-08-20 复核已满足，无需产品侧开发，前置依赖表已更新）；② <strong>货币设置定案方向（2026-08-20）：全量账号独立 feed、独立 target country，feed 统一 EUR 提交</strong>——GMC 规则（6324371 ISO 4217 / 7052112 三方一致 / 160637 支持货币+Currency Conversion / 14991840 多 target country）要求 feed 币种与落地页展示一致，而所有站前端默认展示均为 EUR（wlw.de、ep.fr、ep.co.uk 均实测 UI 显示 €；含英国公司 GBP 原币品 10 GBP → “from 11,69 €” 换算实证）→ 无多币种需求，原币提交必 mismatch；非欧元国家市场（UK/CH/SE/PL…）由 Google Currency Conversion 自动按当地货币展示；<strong>品池原币分布（Redshift 2026-08-20）：</strong>wlw.de 非 EUR 25,344（4.4%）、第一期 EP 三账号 256（0.09%）、<strong>推全新增 EP 非 EUR ~129k（GB 55,008 GBP / PL 30,433 PLN / TR 14,989 TRL / RO 8,977 RON / CZ 5,405 CZK / DK 4,331 DKK / CH 4,899 CHF / HU 4,489 HUF 等，占 EP 带价品 ~19%）</strong>；待确认三项（R1 前）：a) wlw/EP 前端换算汇率来源与更新频率（feed 换算需同口径）；b) “Währung und Sprache” 选择器是否按访客地区自动变（若自动变，Google 爬虫可能抓到非 EUR 版本，需 wlw 提供稳定默认版本）；c) 换算后价格与 JSON-LD 原币差异是否影响爬虫校验（实测观察）；③ 若 a/b 无法确认，降级方案：第一期 skip 非 EUR 品（~25.6k，占总量 0.04%）；推全时 TRL 单独评估（波动大）</p>
 </div>
 
 
-<!-- ==================== 3. 三大数据差距决策方案 ==================== -->
-<h2>3. 三大数据差距决策方案</h2>
+<!-- ==================== 4. 三大数据差距决策方案 ==================== -->
+<h2>4. 三大数据差距决策方案</h2>
 
 <div class="card">
 <h3>A) availability（库存状态）</h3>
@@ -257,8 +285,8 @@
 <ul>
   <li>82.9% 有价格品只有 price_min（本身就是单值），无需额外处理</li>
   <li>区间价中 49.1% 的 gap 在 1.5x 以内，use min 与实际价格偏差可控</li>
-  <li><strong>行业实证（2026-08-20，见 2.8）：</strong>Made-in-China 等 B2B 平台在购物渠道提交并展示<strong>最低价（min）</strong>，页面 JSON-LD 亦输出 min——feed 用 min 与落地页完全一致，零 mismatch 风险；用 max（MOQ 档单价）与行业实践相反且必然 mismatch</li>
-  <li><strong>官方落地页要求（见 2.9）：</strong>“clearly show the product price” 已满足（2026-08-20 复核：有价格品 PDP UI 已展示 “ab min €”，无需新增依赖）——feed 用 min 与 UI / JSON-LD 三方一致；range 品 UI 显示 “min - max €”，min 在首位最显眼</li>
+  <li><strong>行业实证（2026-08-20，见 3.8）：</strong>Made-in-China 等 B2B 平台在购物渠道提交并展示<strong>最低价（min）</strong>，页面 JSON-LD 亦输出 min——feed 用 min 与落地页完全一致，零 mismatch 风险；用 max（MOQ 档单价）与行业实践相反且必然 mismatch</li>
+  <li><strong>官方落地页要求（见 3.9）：</strong>“clearly show the product price” 已满足（2026-08-20 复核：有价格品 PDP UI 已展示 “ab min €”，无需新增依赖）——feed 用 min 与 UI / JSON-LD 三方一致；range 品 UI 显示 “min - max €”，min 在首位最显眼</li>
   <li><strong>例外处理：</strong>gap > 10x 的 20,769 个 offer 建议 <strong>skip（不上传）</strong>——UI 展示 min-max 范围价，gap 过大时 min 与实际成交价偏离大，影响点击转化与审核观感（注：此前“与页面 JSON-LD 不一致”的理由不成立——JSON-LD 即输出 min，与 feed 一致）</li>
 </ul>
 </div>
@@ -266,7 +294,7 @@
 <div class="card">
 <h3>C) link（产品落地页 URL）</h3>
 <p><strong>问题：</strong>data_external_url 指向供应商外部网站（如 <code>https://supplier-shop.com/product/xyz</code>），GMC 要求 URL 是自有已验证域名的 PDP——<strong>我们要给自己引流，不导流商家站</strong>。</p>
-<p><strong>推荐方案：构造 wlw.de 自有 PDP URL（已实测验证，见 2.6）</strong></p>
+<p><strong>推荐方案：构造 wlw.de 自有 PDP URL（已实测验证，见 3.6）</strong></p>
 <p>wlw.de PDP URL 模式：<code>https://www.wlw.de/de/firma/{公司slug}-{公司slug_id}/produkte/{产品slug}-{产品slug_id}</code></p>
 <ul>
   <li>三要素：公司 slug_id（companies.slug_id，100%）+ 公司 slug（slugify 公司名）+ 产品 slug_id（offers.slug_id，100%）</li>
@@ -277,35 +305,7 @@
 </ul>
 </div>
 
-<!-- ==================== 3. 实施范围 ==================== -->
-<h2>4. 实施范围</h2>
-
-<h3>4.1 第一期 Scope（4 个 GMC 账号，2026-08-20 按域名切分）</h3>
-<table>
-  <tr><th>GMC 账号（域名）</th><th>带价品</th><th>GMC Ready*</th><th>其中单值价（Phase 1 先传）</th><th>区间价（Phase 2）</th></tr>
-  <tr><td><strong>wlw.de</strong>（wlw=true 全部）</td><td class="num">568,945</td><td class="num">567,428</td><td class="num">477,828</td><td class="num">89,600</td></tr>
-  <tr><td><strong>europages.fr</strong>（可卖到法国的品）</td><td class="num">117,962</td><td class="num">116,792</td><td class="num">105,186</td><td class="num">11,606</td></tr>
-  <tr><td><strong>europages.es</strong>（可卖到西班牙的品）</td><td class="num">68,091</td><td class="num">67,842</td><td class="num">56,161</td><td class="num">11,681</td></tr>
-  <tr><td><strong>europages.it</strong>（可卖到意大利的品）</td><td class="num">49,532</td><td class="num">49,481</td><td class="num">38,684</td><td class="num">10,797</td></tr>
-  <tr><td><strong>第一期合计</strong></td><td class="num"><strong>804,530</strong></td><td class="num"><strong>801,543</strong></td><td class="num"><strong>~678k</strong></td><td class="num"><strong>~124k</strong></td></tr>
-</table>
-<p class="footnote">* GMC Ready = has price + has title (≤150) + has description (≤5000) + has image（Redshift 2026-08-20）。EP 域名按目标销售国家站归属（<strong>国家站模式，2026-08-20 确认：ep.XX 收录可卖到该国的品，品池来自欧洲各国、非仅该国公司</strong>）；ep.fr/es/it 仅计非 wlw 品（双平台品已在 wlw.de 账号），4 账号间无重复。区间价 gap&gt;10x skip 后 ~110k。</p>
-
-<p><strong>第一期选品逻辑：</strong>4 个账号（域名）并行，各账号先传<strong>单值价</strong>品（Phase 1，~678k）→ 再传<strong>区间价</strong>品（Phase 2，~124k）。</p>
-
-<h3>4.2 发布阶段（按域名账号）</h3>
-<table>
-  <tr><th>阶段</th><th>Scope</th><th>预估量级</th></tr>
-  <tr><td>Phase 1（第一期 MVP）</td><td>4 账号各传<strong>单值价</strong>品：wlw.de ~478k + ep.fr ~105k + ep.es ~56k + ep.it ~39k <strong>（PDP 价格展示依赖上线后启动，见 2.9）</strong></td><td class="num">~678k</td></tr>
-  <tr><td>Phase 2（第一期内）</td><td>4 账号各传<strong>区间价</strong>品（price=min；gap&gt;10x skip）：wlw.de ~90k + ep.fr ~12k + ep.es ~12k + ep.it ~11k</td><td class="num">~124k（skip 后 ~110k）</td></tr>
-  <tr><td>Phase 3（后续）</td><td>其余 EP 国家域名开新账号（europages.de / .co.uk / .nl / .com 等）：DE ~195k + GB ~69k + TR ~40k + NL ~39k + PL ~33k + PT ~21k + 其他（<strong>含非欧元国家站：GB/CH/SE/PL/TR/CZ/DK/RO/HU/NO 等，货币方案见下表</strong>）</td><td class="num">~490k</td></tr>
-  <tr><td>Phase 4（收尾）</td><td>长 title/desc 字段处理 + 短 title 补全（品牌+型号+品类）</td><td class="num">~28k</td></tr>
-  <tr><td><strong>全量总计</strong></td><td>（第一期 ~805k + Phase 3 ~490k + Phase 4 补全）≈ 覆盖全平台带价品</td><td class="num"><strong>~1,258k</strong></td></tr>
-</table>
-
-<p><strong>全量货币设置（2026-08-20 定案方向）：</strong>所有 EP 国家站前端<strong>统一 EUR 展示</strong>（实测：ep.fr PDP “16,00 €”/“32,00 - 40,00 €”；ep.co.uk 站含英国公司品 “55,00 €”/“from 11,69 €”——BEE 4 LIMITED 的 Industrial Labels 库中原币 10 GBP → 前端 “from 11,69 €”，GBP→EUR 换算与 wlw 同机制）→ <strong>feed 全量统一 EUR 提交</strong>，与落地页一致、满足 GMC 三方一致（6324371 / 7052112）；<strong>非欧元国家市场投放（UK/CH/SE/PL…）</strong>：GMC 账号可设多 target country（<a href="https://support.google.com/merchants/answer/14991840" target="_blank">14991840</a>），feed 保持 EUR，Google 官方 <strong>Currency Conversion</strong> 自动按 target country 货币展示（<a href="https://support.google.com/merchants/answer/160637" target="_blank">160637</a> “other currencies may be supported using currency conversion”）→ 无需逐国家换算；<strong>非 EUR 原币品（推全新增 ~129k，占 EP 带价品 ~19%）：</strong>GB 55,008 GBP / PL 30,433 PLN / TR 14,989 TRL / RO 8,977 RON / CZ 5,405 CZK / DK 4,331 DKK / CH 4,899 CHF / HU 4,489 HUF / SE 422 / 其他 ≈129k + wlw.de 25.3k——按前端同口径汇率换算 EUR 提交（与 UI 一致）；TRL 波动大单独评估；或按国家池 skip。EUR 原币品不受影响（非欧元国家品池中 EUR 占比 25-99%，如 GB 29.3% / PL 38.6% / SE 66.8% / BG 98.6%）。</p>
-
-<!-- ==================== 4. 技术方案 ==================== -->
+<!-- ==================== 5. 技术方案 ==================== -->
 <h2>5. 技术方案</h2>
 
 <h3>5.1 Feed 结构（按账号/域名分别出 feed）</h3>
@@ -379,8 +379,8 @@ identifier_exists → false (无 brand/GTIN/MPN 时声明)
 <p><strong>目标：</strong>第一期 <strong>+3 AB2/日</strong>（区间中值），推全后 <strong>+5 AB2/日</strong>（中值合理偏上）——推全量 1,258k 为第一期的 1.56x，AB2 增量线性外推中值 ≈5.5；+5 兼顾长尾流量与审核波动，既非保守（不设 +1 下限）也不激进（不押上限 22）。上线后 4 周按实际数据调校。</p>
 </div>
 
-<!-- ==================== 8. 建议执行计划 ==================== -->
-<h2>8. 建议执行计划 & 时间线</h2>
+<!-- ==================== 7. 建议执行计划 ==================== -->
+<h2>7. 建议执行计划 & 时间线</h2>
 
 <table>
   <tr><th>周次</th><th>行动</th><th>产出</th></tr>
@@ -402,24 +402,24 @@ identifier_exists → false (无 brand/GTIN/MPN 时声明)
   </tr>
 </table>
 
-<!-- ==================== 9. 风险 ==================== -->
-<h2>9. 风险清单</h2>
+<!-- ==================== 8. 风险 ==================== -->
+<h2>8. 风险清单</h2>
 
 <table>
   <tr><th>风险</th><th>影响</th><th>概率</th><th>缓解措施</th></tr>
-  <tr><td>GMC 账号/域名未验证</td><td>无法上传</td><td>中</td><td>优先确认 4 账号 + 4 域名验证状态（<a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a>/<a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a>/<a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a>）；EP 自有 PDP URL 构造模式已实测确认（见 3.C）</td></tr>
+  <tr><td>GMC 账号/域名未验证</td><td>无法上传</td><td>中</td><td>优先确认 4 账号 + 4 域名验证状态（<a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a>/<a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a>/<a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a>）；EP 自有 PDP URL 构造模式已实测确认（见 4.C）</td></tr>
   <tr><td>区间价使用 min 触发 Disapproval</td><td>部分商品下架</td><td>低-中</td><td>gap>10x 的 2 万条 review 后决定 skip</td></tr>
   <tr><td><strong>阶梯价 max/min 差倍数过大仍用 min 提交 → 客诉（2026-08-20 新增）</strong></td><td>买家按展示 min 价发起询盘，实际按高阶梯（MOQ 档）成交，价格落差引发客诉/信任问题（B2B 场景敏感）；gap&gt;10x 的 20,769 个已 skip，1.5x-10x 区间价仍用 min</td><td>中</td><td>上线后监测询盘客诉与成交价差；对 gap 较大（如 &gt;3x）档位评估：a) 同步 skip；b) 与产品侧确认改按 max/均值提交；c) UI “ab min €” 已隐含最低价语义，必要时补充阶梯价说明文案</td></tr>
   <tr><td>PDP URL 落地页与价格不匹配</td><td>Disapproval</td><td>中</td><td>确保落地页展示的价格与 feed 一致</td></tr>
   <tr><td>库存状态与 feed 不一致（缺货品场景）</td><td>页面显示与实际库存矛盾 → Inaccurate availability 违规（<a href="https://support.google.com/merchants/answer/9773127" target="_blank">9773127</a>）/ 用户点击后无法购买体验差</td><td>低（本期全量 in_stock + UI 不显示库存）</td><td>本期静态 in_stock 方案无需处理；未来缺货品上线前先定库存同步机制：feed + JSON-LD + UI 三方一致，out of stock 须置灰购买/询价按钮（<a href="https://www.seroundtable.com/google-merchant-center-out-of-stock-41100.html" target="_blank">2026-03 新要求</a>）</td></tr>
   <tr><td>访问入口在中文国家但商品描述全是德文</td><td>低转化</td><td>低</td><td>德语占 57%，GMC 按 target country 投放</td></tr>
   <tr><td>B2B 平台在 Shopping 中的表现</td><td>CTR 低于 C2C/B2C</td><td>高</td><td>Benchmark 已考虑 B2B 折扣; 目标已按中值上修（推全 +5，第一期 +3）</td></tr>
-  <tr><td>非 EUR 币种品 UI 按 EUR 换算展示（wlw.de ~25.3k 4.4%；第一期 EP 三账号 ~256 个 0.09%；推全新增 ~129k 占 EP 带价品 ~19%）</td><td>feed 按原币提交 → 落地页 UI 展示 EUR 换算价，币种/金额不一致 → price mismatch disapproval（GMC 规则：6324371 / 7052112 / 160637）</td><td>低（feed 统一 EUR 后）；推全后中（~129k 需汇率换算，TRL 波动）</td><td><strong>全量账号 feed 统一按 EUR 提交</strong>（非 EUR 原币按 wlw/EP 同口径汇率换算，与 UI 一致）——已定方向（见 2.7 ⑤ / 2.9 行动 / 4.2 全量货币设置）；待确认：汇率来源/更新频率、货币选择器是否按地区自动变（若自动变则升为高），R1 前确认；推全时 TRL 单独评估，无法确认则按国家池 skip</td></tr>
+  <tr><td>非 EUR 币种品 UI 按 EUR 换算展示（wlw.de ~25.3k 4.4%；第一期 EP 三账号 ~256 个 0.09%；推全新增 ~129k 占 EP 带价品 ~19%）</td><td>feed 按原币提交 → 落地页 UI 展示 EUR 换算价，币种/金额不一致 → price mismatch disapproval（GMC 规则：6324371 / 7052112 / 160637）</td><td>低（feed 统一 EUR 后）；推全后中（~129k 需汇率换算，TRL 波动）</td><td><strong>全量账号 feed 统一按 EUR 提交</strong>（非 EUR 原币按 wlw/EP 同口径汇率换算，与 UI 一致）——已定方向（见 3.7 ⑤ / 3.9 行动 / 2.2 全量货币设置）；待确认：汇率来源/更新频率、货币选择器是否按地区自动变（若自动变则升为高），R1 前确认；推全时 TRL 单独评估，无法确认则按国家池 skip</td></tr>
   <tr><td>Harry 8 月底才接手新项目</td><td>进度延后</td><td>低</td><td>方案先行，数据准备工作同步进行</td></tr>
 </table>
 
-<!-- ==================== 10. 附录 ==================== -->
-<h2>10. 附录：SQL 数据口径</h2>
+<!-- ==================== 9. 附录 ==================== -->
+<h2>9. 附录：SQL 数据口径</h2>
 
 <h3>核心取数 SQL</h3>
 <pre>
