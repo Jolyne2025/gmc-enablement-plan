@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>UC-387 GMC Enablement: Upload Priced PDPs (EN) | 中文版在后半部分</title>
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1100px; margin: 0 auto; padding: 20px; background: #f8f9fa; color: #333; line-height: 1.6; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1280px; margin: 0 auto; padding: 20px; background: #f8f9fa; color: #333; line-height: 1.6; }
   h1 { color: #1a73e8; border-bottom: 2px solid #1a73e8; padding-bottom: 10px; }
   h2 { color: #1967d2; margin-top: 30px; border-bottom: 1px solid #dadce0; padding-bottom: 6px; }
   h3 { color: #5f6368; margin-top: 20px; }
@@ -35,9 +35,59 @@
   pre { background: #f1f3f4; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 13px; }
   .footnote { font-size: 13px; color: #5f6368; }
   .lang-notice { background: #fef7e0; border: 1px solid #f9ab00; color: #b06000; padding: 10px 16px; border-radius: 8px; font-size: 14px; margin: 15px 0; }
+  /* Layout & sidebar TOC (added 2026-08-20) */
+  .layout { display: flex; gap: 24px; align-items: flex-start; }
+  .sidebar {
+    width: 260px; flex-shrink: 0; position: sticky; top: 20px; align-self: flex-start;
+    max-height: calc(100vh - 40px); overflow-y: auto; padding: 14px 12px;
+    background: #fff; border: 1px solid #dadce0; border-radius: 10px;
+  }
+  .sidebar h3 { font-size: 11px; color: #5f6368; text-transform: uppercase; letter-spacing: .06em; margin: 12px 0 6px; padding: 0 8px; }
+  .sidebar ul { list-style: none; margin: 0; padding: 0; }
+  .sidebar li a { display: block; padding: 4px 8px; border-radius: 6px; color: #5f6368; font-size: 13px; border-left: 2px solid transparent; text-decoration: none; }
+  .sidebar li a:hover { background: #e8f0fe; color: #1a73e8; text-decoration: none; }
+  .content { flex: 1; min-width: 0; }
+  h2 { scroll-margin-top: 20px; }
+  @media (max-width: 900px) { .sidebar { display: none; } }
+  @media print { .sidebar { display: none; } .layout { display: block; } }
 </style>
 </head>
 <body>
+
+<div class="layout">
+
+  <!-- ===================== Sidebar TOC ===================== -->
+  <nav class="sidebar">
+    <h3>Contents · EN (front half)</h3>
+    <ul>
+      <li><a href="#en1">1. Prerequisites &amp; Risks</a></li>
+      <li><a href="#en2">2. Scope of Implementation</a></li>
+      <li><a href="#en3">3. Data Landscape Analysis</a></li>
+      <li><a href="#en4">4. Decision Plans for the Three Data Gaps</a></li>
+      <li><a href="#en5">5. Technical Plan</a></li>
+      <li><a href="#en6">6. Data Requirements: Frontend Tracking &amp; Attribution</a></li>
+      <li><a href="#en7">7. AB Increment Estimate</a></li>
+      <li><a href="#en8">8. Recommended Execution Plan &amp; Timeline</a></li>
+      <li><a href="#en9">9. Risk Register</a></li>
+      <li><a href="#en10">10. Appendix: SQL Data Sources</a></li>
+    </ul>
+    <h3>中文版（后半部分）</h3>
+    <ul>
+      <li><a href="#cn1">1. 前置依赖与风险</a></li>
+      <li><a href="#cn2">2. 实施范围</a></li>
+      <li><a href="#cn3">3. 数据全景分析</a></li>
+      <li><a href="#cn4">4. 三大数据差距决策方案</a></li>
+      <li><a href="#cn5">5. 技术方案</a></li>
+      <li><a href="#cn6">6. 数据需求：前端埋点与归因口径</a></li>
+      <li><a href="#cn7">7. AB 增量测算</a></li>
+      <li><a href="#cn8">8. 建议执行计划 &amp; 时间线</a></li>
+      <li><a href="#cn9">9. 风险清单</a></li>
+      <li><a href="#cn10">10. 附录：SQL 数据口径</a></li>
+    </ul>
+  </nav>
+
+  <!-- ===================== Main Content ===================== -->
+  <main class="content">
 
 <!-- ================================================================
      中文版在后半部分 / The Chinese version is in the second half of this page.
@@ -60,7 +110,7 @@
 </div>
 
 <!-- ==================== 1. Prerequisites & Risks ==================== -->
-<h2>1. Prerequisites &amp; Risks</h2>
+<h2 id="en1">1. Prerequisites &amp; Risks</h2>
 
 <table>
   <tr><th>Dependency</th><th>Description</th><th>Status</th></tr>
@@ -71,7 +121,7 @@
 </table>
 
 <!-- ==================== 2. Scope of Implementation ==================== -->
-<h2>2. Scope of Implementation</h2>
+<h2 id="en2">2. Scope of Implementation</h2>
 
 <h3>2.1 Phase 1 Scope (4 GMC accounts, split by domain on 2026-08-20)</h3>
 <table>
@@ -99,7 +149,7 @@
 <p><strong>Full-scale currency setup (direction confirmed 2026-08-20):</strong> All EP country-site frontends <strong>display EUR uniformly</strong> (verified: ep.fr PDP “16,00 €”/“32,00 - 40,00 €”; ep.co.uk site shows UK-company offers as “55,00 €”/“from 11,69 €” — BEE 4 LIMITED's Industrial Labels listing has original price 10 GBP → frontend “from 11,69 €”, GBP→EUR conversion with the same mechanism as wlw) → <strong>feed submits EUR uniformly across the board</strong>, consistent with landing pages and satisfying GMC's three-way consistency (6324371 / 7052112); <strong>non-Eurozone market targeting (UK/CH/SE/PL…)</strong>: a GMC account can set multiple target countries (<a href="https://support.google.com/merchants/answer/14991840" target="_blank">14991840</a>), the feed stays in EUR, and Google's official <strong>Currency Conversion</strong> automatically displays the target-country currency (<a href="https://support.google.com/merchants/answer/160637" target="_blank">160637</a> “other currencies may be supported using currency conversion”) → no per-country conversion needed; <strong>offers originally priced in non-EUR currencies (~129k new at full rollout, ~19% of EP priced offers):</strong> GB 55,008 GBP / PL 30,433 PLN / TR 14,989 TRL / RO 8,977 RON / CZ 5,405 CZK / DK 4,331 DKK / CH 4,899 CHF / HU 4,489 HUF / SE 422 / others ≈129k + wlw.de 25.3k — convert to EUR with the same FX rate as the frontend (consistent with UI); TRL evaluated separately due to high volatility; or skip per country pool. EUR-priced offers are unaffected (EUR share of non-Eurozone country pools is 25-99%, e.g. GB 29.3% / PL 38.6% / SE 66.8% / BG 98.6%).</p>
 
 <!-- ==================== 3. Data Landscape ==================== -->
-<h2>3. Data Landscape Analysis</h2>
+<h2 id="en3">3. Data Landscape Analysis</h2>
 
 <div class="flex">
   <div class="stat"><div class="value">3,495,171</div><div class="label">Active offers online</div></div>
@@ -274,7 +324,7 @@ e.g. https://www.wlw.de/de/firma/mahr-gmbh-280744/produkte/weisslichtinterferome
 </div>
 
 <!-- ==================== 4. Decision Plans for the Three Data Gaps ==================== -->
-<h2>4. Decision Plans for the Three Data Gaps</h2>
+<h2 id="en4">4. Decision Plans for the Three Data Gaps</h2>
 
 <div class="card">
 <h3>A) availability (stock status)</h3>
@@ -315,7 +365,7 @@ e.g. https://www.wlw.de/de/firma/mahr-gmbh-280744/produkte/weisslichtinterferome
 </div>
 
 <!-- ==================== 5. Technical Plan ==================== -->
-<h2>5. Technical Plan</h2>
+<h2 id="en5">5. Technical Plan</h2>
 
 <h3>5.1 Feed Structure (separate feeds per account/domain)</h3>
 <pre>
@@ -371,7 +421,7 @@ identifier_exists → false (declare when no brand/GTIN/MPN)
 </table>
 
 <!-- ==================== 6. Data Requirements: Tracking & Attribution ==================== -->
-<h2>6. Data Requirements: Frontend Tracking &amp; Attribution</h2>
+<h2 id="en6">6. Data Requirements: Frontend Tracking &amp; Attribution</h2>
 
 <div class="card">
 <h3>6.1 Attribution goal &amp; funnel</h3>
@@ -421,7 +471,7 @@ identifier_exists → false (declare when no brand/GTIN/MPN)
 </div>
 
 <!-- ==================== 7. AB Increment Estimate ==================== -->
-<h2>7. AB Increment Estimate</h2>
+<h2 id="en7">7. AB Increment Estimate</h2>
 
 <div class="card">
 <h3>Target: AB2 +5 (full rollout) breakdown</h3>
@@ -439,7 +489,7 @@ identifier_exists → false (declare when no brand/GTIN/MPN)
 </div>
 
 <!-- ==================== 8. Recommended Execution Plan ==================== -->
-<h2>8. Recommended Execution Plan &amp; Timeline</h2>
+<h2 id="en8">8. Recommended Execution Plan &amp; Timeline</h2>
 
 <table>
   <tr><th>Week</th><th>Actions</th><th>Deliverable</th></tr>
@@ -462,7 +512,7 @@ identifier_exists → false (declare when no brand/GTIN/MPN)
 </table>
 
 <!-- ==================== 9. Risk Register ==================== -->
-<h2>9. Risk Register</h2>
+<h2 id="en9">9. Risk Register</h2>
 
 <table>
   <tr><th>Risk</th><th>Impact</th><th>Probability</th><th>Mitigation</th></tr>
@@ -478,7 +528,7 @@ identifier_exists → false (declare when no brand/GTIN/MPN)
 </table>
 
 <!-- ==================== 10. Appendix ==================== -->
-<h2>10. Appendix: SQL Data Sources</h2>
+<h2 id="en10">10. Appendix: SQL Data Sources</h2>
 
 <h3>Core extraction SQL</h3>
 <pre>
@@ -566,7 +616,7 @@ WHERE so.delete_time IS NULL AND so.publish_time IS NOT NULL
 </div>
 
 <!-- ==================== 1. 前置依赖与风险 ==================== -->
-<h2>1. 前置依赖与风险</h2>
+<h2 id="cn1">1. 前置依赖与风险</h2>
 
 <table>
   <tr><th>依赖</th><th>说明</th><th>状态</th></tr>
@@ -577,7 +627,7 @@ WHERE so.delete_time IS NULL AND so.publish_time IS NOT NULL
 </table>
 
 <!-- ==================== 2. 实施范围 ==================== -->
-<h2>2. 实施范围</h2>
+<h2 id="cn2">2. 实施范围</h2>
 
 <h3>2.1 第一期 Scope（4 个 GMC 账号，2026-08-20 按域名切分）</h3>
 <table>
@@ -605,7 +655,7 @@ WHERE so.delete_time IS NULL AND so.publish_time IS NOT NULL
 <p><strong>全量货币设置（2026-08-20 定案方向）：</strong>所有 EP 国家站前端<strong>统一 EUR 展示</strong>（实测：ep.fr PDP “16,00 €”/“32,00 - 40,00 €”；ep.co.uk 站含英国公司品 “55,00 €”/“from 11,69 €”——BEE 4 LIMITED 的 Industrial Labels 库中原币 10 GBP → 前端 “from 11,69 €”，GBP→EUR 换算与 wlw 同机制）→ <strong>feed 全量统一 EUR 提交</strong>，与落地页一致、满足 GMC 三方一致（6324371 / 7052112）；<strong>非欧元国家市场投放（UK/CH/SE/PL…）</strong>：GMC 账号可设多 target country（<a href="https://support.google.com/merchants/answer/14991840" target="_blank">14991840</a>），feed 保持 EUR，Google 官方 <strong>Currency Conversion</strong> 自动按 target country 货币展示（<a href="https://support.google.com/merchants/answer/160637" target="_blank">160637</a> “other currencies may be supported using currency conversion”）→ 无需逐国家换算；<strong>非 EUR 原币品（推全新增 ~129k，占 EP 带价品 ~19%）：</strong>GB 55,008 GBP / PL 30,433 PLN / TR 14,989 TRL / RO 8,977 RON / CZ 5,405 CZK / DK 4,331 DKK / CH 4,899 CHF / HU 4,489 HUF / SE 422 / 其他 ≈129k + wlw.de 25.3k——按前端同口径汇率换算 EUR 提交（与 UI 一致）；TRL 波动大单独评估；或按国家池 skip。EUR 原币品不受影响（非欧元国家品池中 EUR 占比 25-99%，如 GB 29.3% / PL 38.6% / SE 66.8% / BG 98.6%）。</p>
 
 <!-- ==================== 3. 数据全景 ==================== -->
-<h2>3. 数据全景分析</h2>
+<h2 id="cn3">3. 数据全景分析</h2>
 
 <div class="flex">
   <div class="stat"><div class="value">3,495,171</div><div class="label">在线活跃 Offer</div></div>
@@ -780,7 +830,7 @@ WHERE so.delete_time IS NULL AND so.publish_time IS NOT NULL
 </div>
 
 <!-- ==================== 4. 三大数据差距决策方案 ==================== -->
-<h2>4. 三大数据差距决策方案</h2>
+<h2 id="cn4">4. 三大数据差距决策方案</h2>
 
 <div class="card">
 <h3>A) availability（库存状态）</h3>
@@ -821,7 +871,7 @@ WHERE so.delete_time IS NULL AND so.publish_time IS NOT NULL
 </div>
 
 <!-- ==================== 5. 技术方案 ==================== -->
-<h2>5. 技术方案</h2>
+<h2 id="cn5">5. 技术方案</h2>
 
 <h3>5.1 Feed 结构（按账号/域名分别出 feed）</h3>
 <pre>
@@ -877,7 +927,7 @@ identifier_exists → false (无 brand/GTIN/MPN 时声明)
 </table>
 
 <!-- ==================== 6. 数据需求：前端埋点与归因口径 ==================== -->
-<h2>6. 数据需求：前端埋点与归因口径</h2>
+<h2 id="cn6">6. 数据需求：前端埋点与归因口径</h2>
 
 <div class="card">
 <h3>6.1 归因目标与漏斗</h3>
@@ -927,7 +977,7 @@ identifier_exists → false (无 brand/GTIN/MPN 时声明)
 </div>
 
 <!-- ==================== 7. AB 增量测算 ==================== -->
-<h2>7. AB 增量测算</h2>
+<h2 id="cn7">7. AB 增量测算</h2>
 
 <div class="card">
 <h3>目标：AB2 +5（推全）来源拆解</h3>
@@ -945,7 +995,7 @@ identifier_exists → false (无 brand/GTIN/MPN 时声明)
 </div>
 
 <!-- ==================== 8. 建议执行计划 ==================== -->
-<h2>8. 建议执行计划 & 时间线</h2>
+<h2 id="cn8">8. 建议执行计划 &amp; 时间线</h2>
 
 <table>
   <tr><th>周次</th><th>行动</th><th>产出</th></tr>
@@ -968,7 +1018,7 @@ identifier_exists → false (无 brand/GTIN/MPN 时声明)
 </table>
 
 <!-- ==================== 9. 风险 ==================== -->
-<h2>9. 风险清单</h2>
+<h2 id="cn9">9. 风险清单</h2>
 
 <table>
   <tr><th>风险</th><th>影响</th><th>概率</th><th>缓解措施</th></tr>
@@ -984,7 +1034,7 @@ identifier_exists → false (无 brand/GTIN/MPN 时声明)
 </table>
 
 <!-- ==================== 10. 附录 ==================== -->
-<h2>10. 附录：SQL 数据口径</h2>
+<h2 id="cn10">10. 附录：SQL 数据口径</h2>
 
 <h3>核心取数 SQL</h3>
 <pre>
@@ -1056,5 +1106,7 @@ WHERE so.delete_time IS NULL AND so.publish_time IS NOT NULL
   前置背景: Teams 私聊 (Jolyne-Anna, 7/23-8/7) · UC-387 Jira · UC-330 (Anna → Muke data request)
 </p>
 
+</main>
+</div>
 </body>
 </html>
