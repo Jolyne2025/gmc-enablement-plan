@@ -58,7 +58,7 @@
   <tr><td><a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a></td><td><strong>GMC 域名验证（含 EP 域名验证，2026-08-20 合并）</strong>——第一期 4 域名（wlw.de + europages.it + europages.es + europages.fr），各账号验证各自域名；GMC 要求 feed 中 <code>link</code> 指向的域名必须在<strong>该域名自己的账号</strong>内完成“验证 + 声明”（verify and claim website）：每个 EP 域名开独立账号、各自验证各自域名；EP 域名按公司注册国归属（<strong>国家站模式，2026-08-20 确认；ep.fr=法国公司品 ~124k / ep.es=西班牙 ~77k / ep.it=意大利 ~51k，量级见 4.1</strong>）；未验证 → link 报 mismatched domain、商品不收录。链路：先确认 EP 自有 PDP URL 模式（见 3.C）→ 各账号完成域名验证 → 各域名品即可上传；其余 EP 国家域名（de ~195k / co.uk ~69k / nl ~39k 等 ≈ 490k）后续阶段再开账号</td><td><span class="badge yellow">待确认</span></td></tr>
   <tr><td><a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a></td><td>GMC Feed 配置基础建设</td><td><span class="badge yellow">待确认</span></td></tr>
   <tr><td>PDP URL 构造</td><td>wlw.de 侧 slug_id → URL 映射 <strong>已验证</strong>（2026-08-20 实测 200）</td><td><span class="badge green">✅ 已验证</span></td></tr>
-  <tr><td>PDP 前端展示价格</td><td>官方 Landing page requirements 硬性要求（4752265 “clearly show the product price”）；PDP UI 显示 <strong>min 主价格</strong>（或阶梯表，min 最显眼），与 feed/JSON-LD 一致；biz-seo-sdk JSON-LD 已输出 min 无需改，仅 UI 渲染</td><td><span class="badge red">新增依赖</span> 产品侧</td></tr>
+  <tr><td>PDP 前端展示价格</td><td>官方 <a href="https://support.google.com/merchants/answer/4752265" target="_blank">Landing page requirements</a> 硬性要求（<a href="https://support.google.com/merchants/answer/4752265" target="_blank">4752265</a> “clearly show the product price”）；PDP UI 显示 <strong>min 主价格</strong>（或阶梯表，min 最显眼），与 feed/JSON-LD 一致；biz-seo-sdk JSON-LD 已输出 min 无需改，仅 UI 渲染</td><td><span class="badge red">新增依赖</span> 产品侧</td></tr>
   <tr><td><strong>EP 域名验证（第一期：europages.it / europages.es / europages.fr）</strong></td><td><strong>已并入 <a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a></strong>（GMC 域名验证，2026-08-20）——EP 各域名在各自账号内完成“验证 + 声明”，链路与量级见上方 UC-352 行</td><td><span class="badge green">✅ 已合并</span></td></tr>
   <tr><td>Feed 更新机制</td><td>增量更新 / 全量刷新的方案设计</td><td><span class="badge yellow">需技术设计</span></td></tr>
 </table>
@@ -166,14 +166,14 @@
     <tr><td>公司 slug_id</td><td>companies.companies.slug_id</td><td class="num">100%</td><td>如 280744（Mahr GmbH）</td></tr>
     <tr><td>公司 slug</td><td>slugify(公司名)（小写/变音符转写/标点转连字符）</td><td class="num">11,840 家</td><td>如 Mahr GmbH → mahr-gmbh；<strong>容错：错误 slug + 正确 id 实测 HTTP 200</strong></td></tr>
     <tr><td>产品 slug_id</td><td>supplier_offers.offers.slug_id</td><td class="num">100%（3,495,171 全覆盖）</td><td>如 35874570</td></tr>
-    <tr><td>产品 slug</td><td>supplier_offers.revisions.snapshot_slug（最新版）</td><td class="num">39%</td><td>缺失 61% → <strong>ARISE-1239 已修复</strong>（7/16 上线）：VCG 读路径 fallback 返回 slug_id，URL 降级为 <code>/produkte/{slug_id}</code></td></tr>
+    <tr><td>产品 slug</td><td>supplier_offers.revisions.snapshot_slug（最新版）</td><td class="num">39%</td><td>缺失 61% → <strong><a href="https://visable.atlassian.net/browse/ARISE-1239" target="_blank">ARISE-1239</a> 已修复</strong>（7/16 上线）：VCG 读路径 fallback 返回 slug_id，URL 降级为 <code>/produkte/{slug_id}</code></td></tr>
   </table>
 
   <h3>URL 可访问性实测（curl / WebFetch，2026-08-20）</h3>
   <table>
     <tr><th>URL 变体</th><th>状态</th><th>结论</th></tr>
     <tr><td><code>/firma/mahr-gmbh-280744/produkte/weisslichtinterferometer-...-35874570</code>（带双 slug）</td><td><span class="badge green">HTTP 200</span></td><td>完整模式可用，页面含产品名/描述/价格/公司面包屑</td></tr>
-    <tr><td><code>/firma/mahr-gmbh-280744/produkte/35874570</code>（产品 slug 缺失 fallback）</td><td><span class="badge green">HTTP 200</span></td><td>ARISE-1239 fallback 生效，61% 无 slug 产品走此路径</td></tr>
+    <tr><td><code>/firma/mahr-gmbh-280744/produkte/35874570</code>（产品 slug 缺失 fallback）</td><td><span class="badge green">HTTP 200</span></td><td><a href="https://visable.atlassian.net/browse/ARISE-1239" target="_blank">ARISE-1239</a> fallback 生效，61% 无 slug 产品走此路径</td></tr>
     <tr><td><code>/firma/maher-gmbh-280744/produkte/35874570</code>（错误公司 slug）</td><td><span class="badge green">HTTP 200</span></td><td>公司 slug 容错，slug_id 为权威标识，0 重定向</td></tr>
     <tr><td><code>/firma/280744/produkte/35874570</code>（公司 slug 完全缺失）</td><td><span class="badge red">HTTP 404</span></td><td>公司段必须非空（任一 slug + 正确 id 即可）</td></tr>
   </table>
@@ -199,8 +199,8 @@
     <li><strong>数据层价格真实：</strong>36% 带价品占比成立（2.5 节已随机抽样 30 条验证）；随机线上找产品看不到价格是常态——64% 无价格 + 有价格也不在 UI 展示</li>
     <li><strong>wlw PDP 页面不渲染价格（UI），但输出 JSON-LD 结构化价格：</strong>有价格品 → <code>Product.offers.price</code> 输出且与数据库一致；无价格品 → 不输出 offers。这是 SEO 结构化数据项目（biz-seo-sdk）的成果，对 GMC 是重大利好</li>
     <li><strong>GMC 影响：</strong>① 落地页结构化价格与 feed 价格一致 → <strong>price mismatch disapproval 风险极低</strong>；② 落地页 availability 也输出 InStock，与 feed 统一 in_stock 方案吻合；③ ⚠️ 用户肉眼看不到价格，Shopping 点击后体验打折，可能影响转化（见风险清单）</li>
-    <li><strong>审核合规性结论（页面无价格/库存是否拒登）：</strong>分两层——① <strong>feed 层</strong>：price / availability 为必填，缺失则商品不收录（我们已提供，达标）；② <strong>落地页层</strong>：mismatch 仅在“页面显示的状态与 feed 不一致”时触发（页面不显示 → 不构成 mismatch）；<strong>但 Google 官方 Landing page requirements（4752265）明确要求 “clearly show the product price on the landing page”</strong>——PDP UI 不显示价格属于落地页展示要求的合规缺口，虽不构成 mismatch 拒登，但叠加询价制“不可直接购买”存在无法使用 GMC 的实质风险（详见 2.9）。本页面 JSON-LD 输出价格与 feed 一致，是爬虫验证层面的加分项，但<strong>不能替代 UI 展示</strong>。</li>
-    <li><strong>availability 审核结论（2026-08-20 补充）：</strong>① <strong>会被审核</strong>——feed 层必填（已达标）+ 落地页层一致性检查：页面显示的实际库存状态与 feed 矛盾（页面“可加购”但 feed 标 out of stock，或页面“售罄”但 feed 标 in stock）→ mismatch disapproval（官方 Inaccurate availability status 文档 9773127 专项处理）；页面<strong>不显示</strong>库存状态 → 不构成 mismatch（与 price 同逻辑）；② <strong>UI 非硬性</strong>——Landing page requirements 只硬性要求价格 “clearly show”，未要求 UI 显示“有货”状态；但 UI 一旦显示任何库存状态（标签/按钮态），必须与 feed 一致，否则 mismatch；③ <strong>2026-03-26 Google 更新 Landing page requirements</strong>：“products can successfully be added to a cart and delivered to a customer”；“out of stock 商品落地页 Buy 按钮必须置灰”（隐藏/可点击均不允许）——对 wlw 询价制（无 Buy 按钮）强化了“不可直接购买”的实质风险（与 2.9 结论互相印证）；④ <strong>结构化数据必须写且与 feed 一致</strong>：官方 price/availability mismatch 修复文档（9773429）明确要求 price 与 availability 与页面 schema markup 对齐——biz-seo-sdk 已输出 offers.availability=InStock，与 feed 统一 in_stock 吻合，<strong>无需新开发</strong>；⚠️ 反向约束：若未来上线缺货品，feed + JSON-LD + UI 三方必须同步改为真实状态，否则构成 Inaccurate availability 违规。</li>
+    <li><strong>审核合规性结论（页面无价格/库存是否拒登）：</strong>分两层——① <strong>feed 层</strong>：price / availability 为必填，缺失则商品不收录（我们已提供，达标）；② <strong>落地页层</strong>：mismatch 仅在“页面显示的状态与 feed 不一致”时触发（页面不显示 → 不构成 mismatch）；<strong>但 Google 官方 Landing page requirements（<a href="https://support.google.com/merchants/answer/4752265" target="_blank">4752265</a>）明确要求 “clearly show the product price on the landing page”</strong>——PDP UI 不显示价格属于落地页展示要求的合规缺口，虽不构成 mismatch 拒登，但叠加询价制“不可直接购买”存在无法使用 GMC 的实质风险（详见 2.9）。本页面 JSON-LD 输出价格与 feed 一致，是爬虫验证层面的加分项，但<strong>不能替代 UI 展示</strong>。</li>
+    <li><strong>availability 审核结论（2026-08-20 补充）：</strong>① <strong>会被审核</strong>——feed 层必填（已达标）+ 落地页层一致性检查：页面显示的实际库存状态与 feed 矛盾（页面“可加购”但 feed 标 out of stock，或页面“售罄”但 feed 标 in stock）→ mismatch disapproval（官方 Inaccurate availability status 文档 <a href="https://support.google.com/merchants/answer/9773127" target="_blank">9773127</a> 专项处理）；页面<strong>不显示</strong>库存状态 → 不构成 mismatch（与 price 同逻辑）；② <strong>UI 非硬性</strong>——Landing page requirements 只硬性要求价格 “clearly show”，未要求 UI 显示“有货”状态；但 UI 一旦显示任何库存状态（标签/按钮态），必须与 feed 一致，否则 mismatch；③ <strong><a href="https://www.seroundtable.com/google-merchant-center-out-of-stock-41100.html" target="_blank">2026-03-26 Google 更新 Landing page requirements</a></strong>（SERoundtable 报道）：“products can successfully be added to a cart and delivered to a customer”；“out of stock 商品落地页 Buy 按钮必须置灰”（隐藏/可点击均不允许）——对 wlw 询价制（无 Buy 按钮）强化了“不可直接购买”的实质风险（与 2.9 结论互相印证）；④ <strong>结构化数据必须写且与 feed 一致</strong>：官方 price/availability mismatch 修复文档（<a href="https://support.google.com/merchants/answer/9773429" target="_blank">9773429</a>）明确要求 price 与 availability 与页面 schema markup 对齐——biz-seo-sdk 已输出 offers.availability=InStock，与 feed 统一 in_stock 吻合，<strong>无需新开发</strong>；⚠️ 反向约束：若未来上线缺货品，feed + JSON-LD + UI 三方必须同步改为真实状态，否则构成 Inaccurate availability 违规。</li>
   </ul>
 </div>
 
@@ -212,8 +212,8 @@
 
   <table>
     <tr><th>验证项</th><th>结果</th></tr>
-    <tr><td>Bing Shopping 搜索 “wholesale stainless steel tumbler”</td><td>Made-in-China 批发产品全部显示<strong>单个最低价</strong>：$0.97 / $1.78 / $2.80 / $3.04 / $3.13 / $3.33 / $3.64 / $3.76 / $4.18 / $5.07（均为阶梯价最低档），无一显示 max 或区间</td></tr>
-    <tr><td>Made-in-China 产品页（cnyihi.en.made-in-china.com 实站）</td><td>页面 UI 显示<strong>阶梯价表</strong>（US$3.14 / 2.86 / 2.72 / 2.57，MOQ 档最高、大批量最低——与 wlw 的 min/max 语义同构）；<strong>JSON-LD offers.price = “2.57”（= min）</strong>，availability=InStock</td></tr>
+    <tr><td><a href="https://www.bing.com/shop?q=wholesale+stainless+steel+tumbler" target="_blank">Bing Shopping 搜索 “wholesale stainless steel tumbler”</a></td><td>Made-in-China 批发产品全部显示<strong>单个最低价</strong>：$0.97 / $1.78 / $2.80 / $3.04 / $3.13 / $3.33 / $3.64 / $3.76 / $4.18 / $5.07（均为阶梯价最低档），无一显示 max 或区间</td></tr>
+    <tr><td>Made-in-China 产品页（<a href="https://cnyihi.en.made-in-china.com/" target="_blank">cnyihi.en.made-in-china.com</a> 实站）</td><td>页面 UI 显示<strong>阶梯价表</strong>（US$3.14 / 2.86 / 2.72 / 2.57，MOQ 档最高、大批量最低——与 wlw 的 min/max 语义同构）；<strong>JSON-LD offers.price = “2.57”（= min）</strong>，availability=InStock</td></tr>
     <tr><td>批量装商品（“20 Skinny Straight Sublimation Tumblers”）</td><td>显示 $84.00 = <strong>最小销售单位的打包总价</strong>（20 件装）→ Google “total price of the minimum purchasable quantity” 的真实语义：按最小销售单位（整箱/整套/20件装）提交打包总价；按件销售（MOQ=1 piece）提交单件价 = <strong>min</strong></td></tr>
   </table>
 
@@ -228,9 +228,9 @@
 
   <table>
     <tr><th>来源</th><th>要点</th></tr>
-    <tr><td>Google Merchant Center Help<br><strong>About landing page requirements</strong>（官方文档 4752265）</td><td>“<strong>Clearly show the product price on the landing page. The price should be easy to view, and should match your product data. If your landing page has multiple prices, the price of the advertised product must be the most prominent.</strong>”<br>落地页<strong>必须</strong>清晰展示价格；多价格（如阶梯/区间）时，广告商品的价格必须<strong>最显眼</strong></td></tr>
-    <tr><td>Google Ads Community 官方论坛（107143830，Product Expert 推荐答案）</td><td>“if you do not have a price on the landing page and the user can't purchase the product directly through your site then you can't use Google Merchant Center”——落地页无价格 + 不可直接购买（询价制）→ <strong>不能使用 GMC</strong></td></tr>
-    <tr><td>price 属性定义（6324371）</td><td>“Submit an amount and currency that match the price on your landing page and the checkout pages”；变体价格场景：“different prices for each of these variants”（多规格多价可拆分为变体处理）</td></tr>
+    <tr><td>Google Merchant Center Help<br><strong><a href="https://support.google.com/merchants/answer/4752265" target="_blank">About landing page requirements</a></strong>（官方文档 <a href="https://support.google.com/merchants/answer/4752265" target="_blank">4752265</a>）</td><td>“<strong>Clearly show the product price on the landing page. The price should be easy to view, and should match your product data. If your landing page has multiple prices, the price of the advertised product must be the most prominent.</strong>”<br>落地页<strong>必须</strong>清晰展示价格；多价格（如阶梯/区间）时，广告商品的价格必须<strong>最显眼</strong></td></tr>
+    <tr><td>Google Ads Community 官方论坛（<a href="https://support.google.com/google-ads/thread/107143830" target="_blank">107143830</a>，Product Expert 推荐答案）</td><td>“if you do not have a price on the landing page and the user can't purchase the product directly through your site then you can't use Google Merchant Center”——落地页无价格 + 不可直接购买（询价制）→ <strong>不能使用 GMC</strong></td></tr>
+    <tr><td>price 属性定义（<a href="https://support.google.com/merchants/answer/6324371" target="_blank">6324371</a>）</td><td>“Submit an amount and currency that match the price on your landing page and the checkout pages”；变体价格场景：“different prices for each of these variants”（多规格多价可拆分为变体处理）</td></tr>
   </table>
 
   <p><strong>结论：</strong>① PDP <strong>必须展示价格</strong>——官方 Landing page requirements 的硬性要求（“clearly show”），非可选优化；② 展示的价格必须与 feed 一致 → PDP 应显示 <strong>min 作为主价格（最显眼）</strong>，或显示阶梯价表（min 最显眼），与 feed / JSON-LD 三方一致；③ wlw 是询价制（无直接购买），叠加“UI 无价格”双缺口 → 若 PDP 不显示价格，GMC 投放存在被拒/无法使用的实质风险（2.7 结论据此修正）；④ biz-seo-sdk JSON-LD 已输出 min，<strong>无需改动</strong>，仅需前端 UI 渲染。</p>
@@ -272,7 +272,7 @@
 <p>wlw.de PDP URL 模式：<code>https://www.wlw.de/de/firma/{公司slug}-{公司slug_id}/produkte/{产品slug}-{产品slug_id}</code></p>
 <ul>
   <li>三要素：公司 slug_id（companies.slug_id，100%）+ 公司 slug（slugify 公司名）+ 产品 slug_id（offers.slug_id，100%）</li>
-  <li><strong>产品 slug 缺失（61%）不阻塞：</strong>ARISE-1239（7/16 已上线）VCG 读路径 fallback 返回 slug_id，<code>/produkte/{slug_id}</code> 实测 HTTP 200</li>
+  <li><strong>产品 slug 缺失（61%）不阻塞：</strong><a href="https://visable.atlassian.net/browse/ARISE-1239" target="_blank">ARISE-1239</a>（7/16 已上线）VCG 读路径 fallback 返回 slug_id，<code>/produkte/{slug_id}</code> 实测 HTTP 200</li>
   <li><strong>公司 slug 容错：</strong>错误 slug + 正确 slug_id 实测 HTTP 200（slug_id 为权威标识）；公司段完全缺失才 404</li>
   <li><strong>EP 侧：</strong>ep_products.prd_url 同为商家外部链接不可用；EP 自有 PDP URL 模式待技术确认——<strong>2026-08-20 确认按域名单开账号后，第一期 3 个 EP 账号（ep.it/es/fr）均依赖该模式</strong>；EP 域名按公司注册国归属子域（<strong>国家站模式，2026-08-20 确认</strong>）；EP 自有 PDP URL 构造模式仍待技术确认；确认后各 EP 账号在各自 GMC 账号完成域名验证（见 1. 前置依赖）</li>
   <li><strong>⚠️ GMC 域名验证：</strong>wlw.de 需在 GMC 完成域名验证（<a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a> 前置）</li>
@@ -315,15 +315,15 @@ title         → data_name (truncate to 150 if needed)
 description   → data_description (plain text, truncate to 5000 if needed)
 link          → 按账号域名：
                  # wlw.de 账号: https://www.wlw.de/de/firma/{company_slug}-{company_slug_id}/produkte/{product_slug}-{slug_id}
-                 #   产品 slug 缺失时 fallback: .../produkte/{slug_id} (ARISE-1239, 实测 200)
+                 #   产品 slug 缺失时 fallback: .../produkte/{slug_id} (<a href="https://visable.atlassian.net/browse/ARISE-1239" target="_blank">ARISE-1239</a>, 实测 200)
                  # ep.it / ep.es / ep.fr 账号: EP 自有 PDP URL（模式待技术确认，见 3.C）
 image_link    → first image URL from supplier_offers.images
 price         → {data_price_min} {data_price_cur} (e.g. "49.99 EUR")
                  # min = 行业实践（Made-in-China 等 B2B 提交最低价）+ 与页面 JSON-LD 一致
                  # 区间价同样用 min；gap>10x skip（mean/average 会与页面不一致 → mismatch）
 availability  → in_stock (static)
-                 # JSON-LD（biz-seo-sdk）已输出 availability=InStock，feed=JSON-LD=落地页三方一致（官方要求 price/availability 与 schema markup 对齐，9773429）
-                 # 本期全量 in_stock 静态方案；未来缺货品须 feed+JSON-LD+UI 三方同步真实状态（2026-03 起 out of stock 须置灰 Buy 按钮，9773127）
+                 # JSON-LD（biz-seo-sdk）已输出 availability=InStock，feed=JSON-LD=落地页三方一致（官方要求 price/availability 与 schema markup 对齐，<a href="https://support.google.com/merchants/answer/9773429" target="_blank">9773429</a>）
+                 # 本期全量 in_stock 静态方案；未来缺货品须 feed+JSON-LD+UI 三方同步真实状态（<a href="https://www.seroundtable.com/google-merchant-center-out-of-stock-41100.html" target="_blank">2026-03</a> 起 out of stock 须置灰 Buy 按钮，<a href="https://support.google.com/merchants/answer/9773127" target="_blank">9773127</a>）
 identifier_exists → false (无 brand/GTIN/MPN 时声明)
 </pre>
 
@@ -421,10 +421,10 @@ identifier_exists → false (无 brand/GTIN/MPN 时声明)
   <tr><td>GMC 账号/域名未验证</td><td>无法上传</td><td>中</td><td>优先确认 4 账号 + 4 域名验证状态（<a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a>/<a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a>/<a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a>）；EP 自有 PDP URL 构造模式需技术确认（域名归属已按国家站模式确认）</td></tr>
   <tr><td>区间价使用 min 触发 Disapproval</td><td>部分商品下架</td><td>低-中</td><td>gap>10x 的 2 万条 review 后决定 skip</td></tr>
   <tr><td>PDP URL 落地页与价格不匹配</td><td>Disapproval</td><td>中</td><td>确保落地页展示的价格与 feed 一致</td></tr>
-  <tr><td>库存状态与 feed 不一致（缺货品场景）</td><td>页面显示与实际库存矛盾 → Inaccurate availability 违规（9773127）/ 用户点击后无法购买体验差</td><td>低（本期全量 in_stock + UI 不显示库存）</td><td>本期静态 in_stock 方案无需处理；未来缺货品上线前先定库存同步机制：feed + JSON-LD + UI 三方一致，out of stock 须置灰购买/询价按钮（2026-03 新要求）</td></tr>
+  <tr><td>库存状态与 feed 不一致（缺货品场景）</td><td>页面显示与实际库存矛盾 → Inaccurate availability 违规（<a href="https://support.google.com/merchants/answer/9773127" target="_blank">9773127</a>）/ 用户点击后无法购买体验差</td><td>低（本期全量 in_stock + UI 不显示库存）</td><td>本期静态 in_stock 方案无需处理；未来缺货品上线前先定库存同步机制：feed + JSON-LD + UI 三方一致，out of stock 须置灰购买/询价按钮（<a href="https://www.seroundtable.com/google-merchant-center-out-of-stock-41100.html" target="_blank">2026-03 新要求</a>）</td></tr>
   <tr><td>访问入口在中文国家但商品描述全是德文</td><td>低转化</td><td>低</td><td>德语占 57%，GMC 按 target country 投放</td></tr>
   <tr><td>B2B 平台在 Shopping 中的表现</td><td>CTR 低于 C2C/B2C</td><td>高</td><td>Benchmark 已考虑 B2B 折扣; 目标已按中值上修（推全 +5，第一期 +3）</td></tr>
-  <tr><td>PDP 页面 UI 不显示价格（仅 JSON-LD 输出）</td><td>违反官方 Landing page requirements（“clearly show the product price”），叠加询价制“不可直接购买” → 存在无法使用 GMC / 商品被拒风险；且用户点击后看不到价格，转化打折</td><td>高</td><td><strong>新增依赖：PDP 展示 min 主价格</strong>（与 feed/JSON-LD 三方一致），R1 上线前完成；biz-seo-sdk 无需改</td></tr>
+  <tr><td>PDP 页面 UI 不显示价格（仅 JSON-LD 输出）</td><td>违反官方 <a href="https://support.google.com/merchants/answer/4752265" target="_blank">Landing page requirements</a>（“clearly show the product price”），叠加询价制“不可直接购买” → 存在无法使用 GMC / 商品被拒风险；且用户点击后看不到价格，转化打折</td><td>高</td><td><strong>新增依赖：PDP 展示 min 主价格</strong>（与 feed/JSON-LD 三方一致），R1 上线前完成；biz-seo-sdk 无需改</td></tr>
   <tr><td>Harry 8 月底才接手新项目</td><td>进度延后</td><td>低</td><td>方案先行，数据准备工作同步进行</td></tr>
 </table>
 
