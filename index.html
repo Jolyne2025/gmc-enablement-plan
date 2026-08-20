@@ -57,8 +57,6 @@
   <tr><td><a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a></td><td>GMC 账号开通 / 配置——<strong>按域名单开账号（2026-08-20 确认）：第一期 4 个账号 = wlw.de + europages.it / europages.es / europages.fr，各自独立 feed、独立 target country（DE/FR/ES/IT，全部欧元区，统一 EUR）</strong></td><td><span class="badge yellow">待确认</span></td></tr>
   <tr><td><a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a></td><td><strong>GMC 域名验证（含 EP 域名验证，2026-08-20 合并）</strong>——第一期 4 域名（wlw.de + europages.it + europages.es + europages.fr），各账号验证各自域名；GMC 要求 feed 中 <code>link</code> 指向的域名必须在<strong>该域名自己的账号</strong>内完成“验证 + 声明”（verify and claim website）：每个 EP 域名开独立账号、各自验证各自域名；EP 域名按目标销售国家站归属（<strong>国家站模式，2026-08-20 确认：ep.fr 收录可卖到法国的品，品池来自欧洲各国、非仅法国公司；ep.fr ~124k / ep.es ~77k / ep.it ~51k，量级见 4.1</strong>）；未验证 → link 报 mismatched domain、商品不收录。链路：先确认 EP 自有 PDP URL 模式（见 3.C）→ 各账号完成域名验证 → 各域名品即可上传；其余 EP 国家域名（de ~195k / co.uk ~69k / nl ~39k 等 ≈ 490k）后续阶段再开账号</td><td><span class="badge yellow">待确认</span></td></tr>
   <tr><td><a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a></td><td>GMC Feed 配置基础建设</td><td><span class="badge yellow">待确认</span></td></tr>
-  <tr><td>PDP URL 构造</td><td>wlw.de 侧 slug_id → URL 映射 <strong>已验证</strong>（2026-08-20 实测 200）</td><td><span class="badge green">✅ 已验证</span></td></tr>
-    <tr><td>PDP 前端展示价格</td><td>官方 <a href="https://support.google.com/merchants/answer/4752265" target="_blank">Landing page requirements</a> 硬性要求（<a href="https://support.google.com/merchants/answer/4752265" target="_blank">4752265</a> “clearly show the product price”）——<strong>2026-08-20 复核：wlw 线上已满足</strong>，有价格品 PDP UI 主价格区已展示（“ab 119 €”格式，range 品显示 min-max 首位），与 feed/JSON-LD 三方一致，<strong>无需新增开发</strong>；⚠️ 非 EUR 币种（CHF/GBP/SEK 等 ~25.3k，4.4%）UI 按 EUR 换算显示 → feed 币种策略需对齐（见 2.7 ④ / 2.9）</td><td><span class="badge green">✅ 已满足</span>（复核 2026-08-20）</td></tr>
     <tr><td>Feed 更新机制</td><td>增量更新 / 全量刷新的方案设计</td><td><span class="badge yellow">需技术设计</span></td></tr>
 </table>
 
@@ -177,7 +175,7 @@
     <tr><td><a href="https://www.wlw.de/de/firma/280744/produkte/35874570" target="_blank"><code>/firma/280744/produkte/35874570</code></a>（公司 slug 完全缺失）</td><td><span class="badge red">HTTP 404</span></td><td>公司段必须非空（任一 slug + 正确 id 即可）</td></tr>
   </table>
 
-  <p><strong>europages 侧（第一期 3 个 EP 域名账号，见 4.1）：</strong><code>europages.ep_products.prd_url</code>（87.5% 覆盖）同样是商家外部站链接（如 ringoplast.de），不可直接使用；EP 自有 PDP URL 构造模式待技术确认（或复用 wlw 侧 slug_id 机制）。</p>
+  <p><strong>europages 侧（第一期 3 个 EP 域名账号，见 4.1）：</strong><code>europages.ep_products.prd_url</code>（87.5% 覆盖）同样是商家外部站链接（如 ringoplast.de），不可直接使用；EP 自有 PDP URL 构造模式<strong>已实测确认</strong>（见 3.C：<code>/fr/company/{公司slug}-{公司slug_id}/products/{产品slug}-{产品slug_id}</code>，产品段可降级 <code>/products/{slug_id}</code>）。</p>
 </div>
 
 <!-- ==================== 2.7 线上对照验证 ==================== -->
@@ -427,7 +425,7 @@ identifier_exists → false (无 brand/GTIN/MPN 时声明)
 
 <table>
   <tr><th>风险</th><th>影响</th><th>概率</th><th>缓解措施</th></tr>
-  <tr><td>GMC 账号/域名未验证</td><td>无法上传</td><td>中</td><td>优先确认 4 账号 + 4 域名验证状态（<a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a>/<a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a>/<a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a>）；EP 自有 PDP URL 构造模式需技术确认（域名归属已按国家站模式确认）</td></tr>
+  <tr><td>GMC 账号/域名未验证</td><td>无法上传</td><td>中</td><td>优先确认 4 账号 + 4 域名验证状态（<a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a>/<a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a>/<a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a>）；EP 自有 PDP URL 构造模式已实测确认（见 3.C）</td></tr>
   <tr><td>区间价使用 min 触发 Disapproval</td><td>部分商品下架</td><td>低-中</td><td>gap>10x 的 2 万条 review 后决定 skip</td></tr>
   <tr><td><strong>阶梯价 max/min 差倍数过大仍用 min 提交 → 客诉（2026-08-20 新增）</strong></td><td>买家按展示 min 价发起询盘，实际按高阶梯（MOQ 档）成交，价格落差引发客诉/信任问题（B2B 场景敏感）；gap&gt;10x 的 20,769 个已 skip，1.5x-10x 区间价仍用 min</td><td>中</td><td>上线后监测询盘客诉与成交价差；对 gap 较大（如 &gt;3x）档位评估：a) 同步 skip；b) 与产品侧确认改按 max/均值提交；c) UI “ab min €” 已隐含最低价语义，必要时补充阶梯价说明文案</td></tr>
   <tr><td>PDP URL 落地页与价格不匹配</td><td>Disapproval</td><td>中</td><td>确保落地页展示的价格与 feed 一致</td></tr>
