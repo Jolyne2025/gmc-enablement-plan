@@ -199,7 +199,8 @@
     <li><strong>数据层价格真实：</strong>36% 带价品占比成立（2.5 节已随机抽样 30 条验证）；随机线上找产品看不到价格是常态——64% 无价格 + 有价格也不在 UI 展示</li>
     <li><strong>wlw PDP 页面不渲染价格（UI），但输出 JSON-LD 结构化价格：</strong>有价格品 → <code>Product.offers.price</code> 输出且与数据库一致；无价格品 → 不输出 offers。这是 SEO 结构化数据项目（biz-seo-sdk）的成果，对 GMC 是重大利好</li>
     <li><strong>GMC 影响：</strong>① 落地页结构化价格与 feed 价格一致 → <strong>price mismatch disapproval 风险极低</strong>；② 落地页 availability 也输出 InStock，与 feed 统一 in_stock 方案吻合；③ ⚠️ 用户肉眼看不到价格，Shopping 点击后体验打折，可能影响转化（见风险清单）</li>
-    <li><strong>审核合规性结论（页面无价格/库存是否拒登）：</strong>分两层——① <strong>feed 层</strong>：price / availability 为必填，缺失则商品不收录（我们已提供，达标）；② <strong>落地页层</strong>：mismatch 仅在“页面显示的价格与 feed 不一致”时触发（页面不显示 → 不构成 mismatch）；<strong>但 Google 官方 Landing page requirements（4752265）明确要求 “clearly show the product price on the landing page”</strong>——PDP UI 不显示价格属于落地页展示要求的合规缺口，虽不构成 mismatch 拒登，但叠加询价制“不可直接购买”存在无法使用 GMC 的实质风险（详见 2.9）。本页面 JSON-LD 输出价格与 feed 一致，是爬虫验证层面的加分项，但<strong>不能替代 UI 展示</strong>。</li>
+    <li><strong>审核合规性结论（页面无价格/库存是否拒登）：</strong>分两层——① <strong>feed 层</strong>：price / availability 为必填，缺失则商品不收录（我们已提供，达标）；② <strong>落地页层</strong>：mismatch 仅在“页面显示的状态与 feed 不一致”时触发（页面不显示 → 不构成 mismatch）；<strong>但 Google 官方 Landing page requirements（4752265）明确要求 “clearly show the product price on the landing page”</strong>——PDP UI 不显示价格属于落地页展示要求的合规缺口，虽不构成 mismatch 拒登，但叠加询价制“不可直接购买”存在无法使用 GMC 的实质风险（详见 2.9）。本页面 JSON-LD 输出价格与 feed 一致，是爬虫验证层面的加分项，但<strong>不能替代 UI 展示</strong>。</li>
+    <li><strong>availability 审核结论（2026-08-20 补充）：</strong>① <strong>会被审核</strong>——feed 层必填（已达标）+ 落地页层一致性检查：页面显示的实际库存状态与 feed 矛盾（页面“可加购”但 feed 标 out of stock，或页面“售罄”但 feed 标 in stock）→ mismatch disapproval（官方 Inaccurate availability status 文档 9773127 专项处理）；页面<strong>不显示</strong>库存状态 → 不构成 mismatch（与 price 同逻辑）；② <strong>UI 非硬性</strong>——Landing page requirements 只硬性要求价格 “clearly show”，未要求 UI 显示“有货”状态；但 UI 一旦显示任何库存状态（标签/按钮态），必须与 feed 一致，否则 mismatch；③ <strong>2026-03-26 Google 更新 Landing page requirements</strong>：“products can successfully be added to a cart and delivered to a customer”；“out of stock 商品落地页 Buy 按钮必须置灰”（隐藏/可点击均不允许）——对 wlw 询价制（无 Buy 按钮）强化了“不可直接购买”的实质风险（与 2.9 结论互相印证）；④ <strong>结构化数据必须写且与 feed 一致</strong>：官方 price/availability mismatch 修复文档（9773429）明确要求 price 与 availability 与页面 schema markup 对齐——biz-seo-sdk 已输出 offers.availability=InStock，与 feed 统一 in_stock 吻合，<strong>无需新开发</strong>；⚠️ 反向约束：若未来上线缺货品，feed + JSON-LD + UI 三方必须同步改为真实状态，否则构成 Inaccurate availability 违规。</li>
   </ul>
 </div>
 
@@ -321,6 +322,8 @@ price         → {data_price_min} {data_price_cur} (e.g. "49.99 EUR")
                  # min = 行业实践（Made-in-China 等 B2B 提交最低价）+ 与页面 JSON-LD 一致
                  # 区间价同样用 min；gap>10x skip（mean/average 会与页面不一致 → mismatch）
 availability  → in_stock (static)
+                 # JSON-LD（biz-seo-sdk）已输出 availability=InStock，feed=JSON-LD=落地页三方一致（官方要求 price/availability 与 schema markup 对齐，9773429）
+                 # 本期全量 in_stock 静态方案；未来缺货品须 feed+JSON-LD+UI 三方同步真实状态（2026-03 起 out of stock 须置灰 Buy 按钮，9773127）
 identifier_exists → false (无 brand/GTIN/MPN 时声明)
 </pre>
 
@@ -418,6 +421,7 @@ identifier_exists → false (无 brand/GTIN/MPN 时声明)
   <tr><td>GMC 账号/域名未验证</td><td>无法上传</td><td>中</td><td>优先确认 4 账号 + 4 域名验证状态（UC-351/352/362）；EP 自有 PDP URL 构造模式需技术确认（域名归属已按国家站模式确认）</td></tr>
   <tr><td>区间价使用 min 触发 Disapproval</td><td>部分商品下架</td><td>低-中</td><td>gap>10x 的 2 万条 review 后决定 skip</td></tr>
   <tr><td>PDP URL 落地页与价格不匹配</td><td>Disapproval</td><td>中</td><td>确保落地页展示的价格与 feed 一致</td></tr>
+  <tr><td>库存状态与 feed 不一致（缺货品场景）</td><td>页面显示与实际库存矛盾 → Inaccurate availability 违规（9773127）/ 用户点击后无法购买体验差</td><td>低（本期全量 in_stock + UI 不显示库存）</td><td>本期静态 in_stock 方案无需处理；未来缺货品上线前先定库存同步机制：feed + JSON-LD + UI 三方一致，out of stock 须置灰购买/询价按钮（2026-03 新要求）</td></tr>
   <tr><td>访问入口在中文国家但商品描述全是德文</td><td>低转化</td><td>低</td><td>德语占 57%，GMC 按 target country 投放</td></tr>
   <tr><td>B2B 平台在 Shopping 中的表现</td><td>CTR 低于 C2C/B2C</td><td>高</td><td>Benchmark 已考虑 B2B 折扣; 目标已按中值上修（推全 +5，第一期 +3）</td></tr>
   <tr><td>PDP 页面 UI 不显示价格（仅 JSON-LD 输出）</td><td>违反官方 Landing page requirements（“clearly show the product price”），叠加询价制“不可直接购买” → 存在无法使用 GMC / 商品被拒风险；且用户点击后看不到价格，转化打折</td><td>高</td><td><strong>新增依赖：PDP 展示 min 主价格</strong>（与 feed/JSON-LD 三方一致），R1 上线前完成；biz-seo-sdk 无需改</td></tr>
