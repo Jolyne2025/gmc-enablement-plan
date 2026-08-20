@@ -172,10 +172,10 @@
   <h3>URL 可访问性实测（curl / WebFetch，2026-08-20）</h3>
   <table>
     <tr><th>URL 变体</th><th>状态</th><th>结论</th></tr>
-    <tr><td><code>/firma/mahr-gmbh-280744/produkte/weisslichtinterferometer-...-35874570</code>（带双 slug）</td><td><span class="badge green">HTTP 200</span></td><td>完整模式可用，页面含产品名/描述/价格/公司面包屑</td></tr>
-    <tr><td><code>/firma/mahr-gmbh-280744/produkte/35874570</code>（产品 slug 缺失 fallback）</td><td><span class="badge green">HTTP 200</span></td><td><a href="https://visable.atlassian.net/browse/ARISE-1239" target="_blank">ARISE-1239</a> fallback 生效，61% 无 slug 产品走此路径</td></tr>
-    <tr><td><code>/firma/maher-gmbh-280744/produkte/35874570</code>（错误公司 slug）</td><td><span class="badge green">HTTP 200</span></td><td>公司 slug 容错，slug_id 为权威标识，0 重定向</td></tr>
-    <tr><td><code>/firma/280744/produkte/35874570</code>（公司 slug 完全缺失）</td><td><span class="badge red">HTTP 404</span></td><td>公司段必须非空（任一 slug + 正确 id 即可）</td></tr>
+    <tr><td><a href="https://www.wlw.de/de/firma/mahr-gmbh-280744/produkte/weisslichtinterferometer-mit-ica-technologie-35874570" target="_blank"><code>/firma/mahr-gmbh-280744/produkte/weisslichtinterferometer-...-35874570</code></a>（带双 slug）</td><td><span class="badge green">HTTP 200</span></td><td>完整模式可用，页面含产品名/描述/价格/公司面包屑</td></tr>
+    <tr><td><a href="https://www.wlw.de/de/firma/mahr-gmbh-280744/produkte/35874570" target="_blank"><code>/firma/mahr-gmbh-280744/produkte/35874570</code></a>（产品 slug 缺失 fallback）</td><td><span class="badge green">HTTP 200</span></td><td><a href="https://visable.atlassian.net/browse/ARISE-1239" target="_blank">ARISE-1239</a> fallback 生效，61% 无 slug 产品走此路径</td></tr>
+    <tr><td><a href="https://www.wlw.de/de/firma/maher-gmbh-280744/produkte/35874570" target="_blank"><code>/firma/maher-gmbh-280744/produkte/35874570</code></a>（错误公司 slug）</td><td><span class="badge green">HTTP 200</span></td><td>公司 slug 容错，slug_id 为权威标识，0 重定向</td></tr>
+    <tr><td><a href="https://www.wlw.de/de/firma/280744/produkte/35874570" target="_blank"><code>/firma/280744/produkte/35874570</code></a>（公司 slug 完全缺失）</td><td><span class="badge red">HTTP 404</span></td><td>公司段必须非空（任一 slug + 正确 id 即可）</td></tr>
   </table>
 
   <p><strong>europages 侧（第一期 3 个 EP 域名账号，见 4.1）：</strong><code>europages.ep_products.prd_url</code>（87.5% 覆盖）同样是商家外部站链接（如 ringoplast.de），不可直接使用；EP 自有 PDP URL 构造模式待技术确认（或复用 wlw 侧 slug_id 机制）。</p>
@@ -189,9 +189,9 @@
 
   <table>
     <tr><th>对照项</th><th>数据库 (Redshift)</th><th>线上页面 (wlw.de)</th><th>结论</th></tr>
-    <tr><td>PMT Glasabfälle（用户抽查）<br><code>/produkte/glasabfaelle-...-36354509</code></td><td>data_price_min = <strong>NULL</strong></td><td>页面无价格（UI 与 JSON-LD 均无）</td><td><span class="badge green">一致</span> 该产品属于 64% 无价格群体；随机抽查命中无价格概率 64%</td></tr>
-    <tr><td>JAKO Duschvorhangstange（随机有价品）<br><code>/produkte/38496079</code></td><td>data_price_min = <strong>119 EUR</strong></td><td>UI 不显示价格；<strong>JSON-LD Product schema 含 <code>offers.price=“119”, priceCurrency=“EUR”, availability=InStock, sku=38496079</code></strong></td><td><span class="badge green">一致</span> 价格 119 = 119，字段全部对账</td></tr>
-    <tr><td>Mahr Weißlichtinterferometer（Jira 工单样例）<br><code>/produkte/35874570</code></td><td>data_price_min = <strong>NULL</strong></td><td>页面无价格；无 JSON-LD offers（但 NUXT payload 保留 price 字段定义）</td><td><span class="badge green">一致</span></td></tr>
+    <tr><td>PMT Glasabfälle（用户抽查）<br><a href="https://www.wlw.de/de/produkte/36354509" target="_blank"><code>/produkte/glasabfaelle-...-36354509</code></a></td><td>data_price_min = <strong>NULL</strong></td><td>页面无价格（UI 与 JSON-LD 均无）</td><td><span class="badge green">一致</span> 该产品属于 64% 无价格群体；随机抽查命中无价格概率 64%</td></tr>
+    <tr><td>JAKO Duschvorhangstange（随机有价品）<br><a href="https://www.wlw.de/de/produkte/38496079" target="_blank"><code>/produkte/38496079</code></a></td><td>data_price_min = <strong>119 EUR</strong></td><td>UI 不显示价格；<strong>JSON-LD Product schema 含 <code>offers.price=“119”, priceCurrency=“EUR”, availability=InStock, sku=38496079</code></strong></td><td><span class="badge green">一致</span> 价格 119 = 119，字段全部对账</td></tr>
+    <tr><td>Mahr Weißlichtinterferometer（Jira 工单样例）<br><a href="https://www.wlw.de/de/produkte/35874570" target="_blank"><code>/produkte/35874570</code></a></td><td>data_price_min = <strong>NULL</strong></td><td>页面无价格；无 JSON-LD offers（但 NUXT payload 保留 price 字段定义）</td><td><span class="badge green">一致</span></td></tr>
   </table>
 
   <p><strong>结论：</strong></p>
