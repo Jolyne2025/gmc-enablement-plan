@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>UC-387 GMC Enablement: Upload Priced PDPs - 需求方案</title>
+<title>UC-387 GMC Enablement: Upload Priced PDPs (EN) | 中文版在后半部分</title>
 <style>
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1100px; margin: 0 auto; padding: 20px; background: #f8f9fa; color: #333; line-height: 1.6; }
   h1 { color: #1a73e8; border-bottom: 2px solid #1a73e8; padding-bottom: 10px; }
@@ -34,16 +34,482 @@
   .dep { background: #fef7e0; padding: 3px 8px; border-radius: 4px; margin: 2px; display: inline-block; font-size: 13px; }
   pre { background: #f1f3f4; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 13px; }
   .footnote { font-size: 13px; color: #5f6368; }
+  .lang-notice { background: #fef7e0; border: 1px solid #f9ab00; color: #b06000; padding: 10px 16px; border-radius: 8px; font-size: 14px; margin: 15px 0; }
 </style>
 </head>
 <body>
 
+<!-- ================================================================
+     中文版在后半部分 / The Chinese version is in the second half of this page.
+     English version first for Anna's review.
+================================================================ -->
+
+<div class="lang-notice">
+  <strong>EN first · 中文在后：</strong>English version first (for Anna's review) — the Chinese version is in the second half of this page. / 英文版在前（供 Anna review），中文版在后半部分（供中文同事 review）。
+</div>
+
 <h1>UC-387: GMC Enablement — Upload Priced PDPs</h1>
+<p style="font-size:16px;color:#5f6368;">Shopping Organic channel enablement · Target AB2 +5 (full rollout) · Epic 4: PDP Growth Plan (UC-377)</p>
+
+<div class="meta">
+  <strong>Date:</strong> 2026-08-20 &nbsp;|&nbsp;
+  <strong>Reporter:</strong> Jolyne Zhang &nbsp;|&nbsp;
+  <strong>Priority:</strong> P1 &nbsp;|&nbsp;
+  <strong>Dependency Scope:</strong> External &nbsp;|&nbsp;
+  <strong>Dependencies:</strong> <span class="dep"><a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a></span> <span class="dep"><a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a></span> <span class="dep"><a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a></span>
+</div>
+
+<!-- ==================== 1. Prerequisites & Risks ==================== -->
+<h2>1. Prerequisites &amp; Risks</h2>
+
+<table>
+  <tr><th>Dependency</th><th>Description</th><th>Status</th></tr>
+  <tr><td><a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a></td><td>GMC account setup / configuration — <strong>separate account per domain (confirmed 2026-08-20): Phase 1 = 4 accounts wlw.de + europages.it / europages.es / europages.fr, each with its own independent feed and target country (DE/FR/ES/IT, all Eurozone, unified EUR)</strong></td><td><span class="badge yellow">Pending confirmation</span></td></tr>
+  <tr><td><a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a></td><td><strong>GMC domain verification (incl. EP domains, merged on 2026-08-20)</strong> — Phase 1 covers 4 domains (wlw.de + europages.it + europages.es + europages.fr), each account verifies its own domain; GMC requires that the domain of the <code>link</code> attribute in the feed must be "verified and claimed" <strong>in that domain's own account</strong>: each EP domain gets a separate account and verifies its own domain; EP domains are assigned by target-sales-country site (<strong>country-site model, confirmed 2026-08-20: ep.fr lists products that can be sold to France, with the product pool coming from all European countries, not only French companies; ep.fr ~124k / ep.es ~77k / ep.it ~51k, see 2.1 for scale</strong>); unverified → link reports mismatched domain and products are not served. Chain: confirm EP's own PDP URL pattern (see 4.C) → each account completes domain verification → products of that domain can be uploaded; remaining EP country domains (de ~195k / co.uk ~69k / nl ~39k etc. ≈ 490k) open accounts in later phases</td><td><span class="badge yellow">Pending confirmation</span></td></tr>
+  <tr><td><a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a></td><td>GMC feed configuration infrastructure</td><td><span class="badge yellow">Pending confirmation</span></td></tr>
+  <tr><td>Feed update mechanism</td><td>Design of incremental / full refresh</td><td><span class="badge yellow">Needs tech design</span></td></tr>
+</table>
+
+<!-- ==================== 2. Scope of Implementation ==================== -->
+<h2>2. Scope of Implementation</h2>
+
+<h3>2.1 Phase 1 Scope (4 GMC accounts, split by domain on 2026-08-20)</h3>
+<table>
+  <tr><th>GMC account (domain)</th><th>Offers with price</th><th>GMC Ready*</th><th>Single price (Phase 1 first)</th><th>Range price (Phase 2)</th></tr>
+  <tr><td><strong>wlw.de</strong> (all wlw=true)</td><td class="num">568,945</td><td class="num">567,428</td><td class="num">477,828</td><td class="num">89,600</td></tr>
+  <tr><td><strong>europages.fr</strong> (products sellable in France)</td><td class="num">117,962</td><td class="num">116,792</td><td class="num">105,186</td><td class="num">11,606</td></tr>
+  <tr><td><strong>europages.es</strong> (products sellable in Spain)</td><td class="num">68,091</td><td class="num">67,842</td><td class="num">56,161</td><td class="num">11,681</td></tr>
+  <tr><td><strong>europages.it</strong> (products sellable in Italy)</td><td class="num">49,532</td><td class="num">49,481</td><td class="num">38,684</td><td class="num">10,797</td></tr>
+  <tr><td><strong>Phase 1 total</strong></td><td class="num"><strong>804,530</strong></td><td class="num"><strong>801,543</strong></td><td class="num"><strong>~678k</strong></td><td class="num"><strong>~124k</strong></td></tr>
+</table>
+<p class="footnote">* GMC Ready = has price + has title (≤150) + has description (≤5000) + has image (Redshift 2026-08-20). EP domains are assigned by target-sales-country site (<strong>country-site model, confirmed 2026-08-20: ep.XX lists products sellable in that country; the pool comes from all European countries, not only that country's companies</strong>); ep.fr/es/it count non-wlw offers only (dual-platform offers are already in the wlw.de account), no duplicates across the 4 accounts. ~110k after skipping range offers with gap&gt;10x.</p>
+
+<p><strong>Phase 1 selection logic:</strong> 4 accounts (domains) run in parallel; each account first uploads <strong>single-price</strong> offers (Phase 1, ~678k), then <strong>range-price</strong> offers (Phase 2, ~124k).</p>
+
+<h3>2.2 Rollout Phases (by domain account)</h3>
+<table>
+  <tr><th>Phase</th><th>Scope</th><th>Estimated volume</th></tr>
+  <tr><td>Phase 1 (Phase-1 MVP)</td><td>Each of the 4 accounts uploads <strong>single-price</strong> offers: wlw.de ~478k + ep.fr ~105k + ep.es ~56k + ep.it ~39k <strong>(starts after PDP price display dependency is live, see 3.9)</strong></td><td class="num">~678k</td></tr>
+  <tr><td>Phase 2 (within Phase 1 period)</td><td>Each of the 4 accounts uploads <strong>range-price</strong> offers (price=min; skip gap&gt;10x): wlw.de ~90k + ep.fr ~12k + ep.es ~12k + ep.it ~11k</td><td class="num">~124k (~110k after skip)</td></tr>
+  <tr><td>Phase 3 (later)</td><td>Open new accounts for remaining EP country domains (europages.de / .co.uk / .nl / .com etc.): DE ~195k + GB ~69k + TR ~40k + NL ~39k + PL ~33k + PT ~21k + others (<strong>incl. non-Eurozone country sites: GB/CH/SE/PL/TR/CZ/DK/RO/HU/NO etc., currency approach in the table below</strong>)</td><td class="num">~490k</td></tr>
+  <tr><td>Phase 4 (wrap-up)</td><td>Handle long title/desc fields + complete short titles (brand + model + category)</td><td class="num">~28k</td></tr>
+  <tr><td><strong>Grand total</strong></td><td>(Phase 1 ~805k + Phase 3 ~490k + Phase 4 completion) ≈ covers all priced offers on the platform</td><td class="num"><strong>~1,258k</strong></td></tr>
+</table>
+
+<p><strong>Full-scale currency setup (direction confirmed 2026-08-20):</strong> All EP country-site frontends <strong>display EUR uniformly</strong> (verified: ep.fr PDP “16,00 €”/“32,00 - 40,00 €”; ep.co.uk site shows UK-company offers as “55,00 €”/“from 11,69 €” — BEE 4 LIMITED's Industrial Labels listing has original price 10 GBP → frontend “from 11,69 €”, GBP→EUR conversion with the same mechanism as wlw) → <strong>feed submits EUR uniformly across the board</strong>, consistent with landing pages and satisfying GMC's three-way consistency (6324371 / 7052112); <strong>non-Eurozone market targeting (UK/CH/SE/PL…)</strong>: a GMC account can set multiple target countries (<a href="https://support.google.com/merchants/answer/14991840" target="_blank">14991840</a>), the feed stays in EUR, and Google's official <strong>Currency Conversion</strong> automatically displays the target-country currency (<a href="https://support.google.com/merchants/answer/160637" target="_blank">160637</a> “other currencies may be supported using currency conversion”) → no per-country conversion needed; <strong>offers originally priced in non-EUR currencies (~129k new at full rollout, ~19% of EP priced offers):</strong> GB 55,008 GBP / PL 30,433 PLN / TR 14,989 TRL / RO 8,977 RON / CZ 5,405 CZK / DK 4,331 DKK / CH 4,899 CHF / HU 4,489 HUF / SE 422 / others ≈129k + wlw.de 25.3k — convert to EUR with the same FX rate as the frontend (consistent with UI); TRL evaluated separately due to high volatility; or skip per country pool. EUR-priced offers are unaffected (EUR share of non-Eurozone country pools is 25-99%, e.g. GB 29.3% / PL 38.6% / SE 66.8% / BG 98.6%).</p>
+
+<!-- ==================== 3. Data Landscape ==================== -->
+<h2>3. Data Landscape Analysis</h2>
+
+<div class="flex">
+  <div class="stat"><div class="value">3,495,171</div><div class="label">Active offers online</div></div>
+  <div class="stat"><div class="value">1,258,017</div><div class="label">With price (36.0%)</div></div>
+  <div class="stat"><div class="value">1,250,823</div><div class="label">GMC basic-ready (99.4%)</div></div>
+  <div class="stat warn-stat"><div class="value">7,194</div><div class="label">Fields need cleanup (0.6%)</div></div>
+</div>
+
+<h3>3.1 Platform Split (priced offers)</h3>
+<table>
+  <tr><th>Platform</th><th>Priced offers</th><th>Share</th><th>GMC Ready*</th></tr>
+  <tr><td>wlw.de (wlw=true)</td><td class="num">568,187</td><td class="num">45.2%</td><td class="num">566,668 (99.7%)</td></tr>
+  <tr><td>europages (ep=true)</td><td class="num">743,213</td><td class="num">59.1%</td><td class="num">738,807 (99.4%)</td></tr>
+  <tr><td>Dual-platform (wlw+ep)</td><td class="num">146,835</td><td class="num">11.7%</td><td class="num">—</td></tr>
+</table>
+<p class="footnote">* GMC Ready = has price + has title (≤150) + has description (≤5000) + has image. Excludes URL and availability.</p>
+<p class="footnote"><strong>europages assigned to subdomains by target-sales-country site (2026-08-20, separate accounts per domain):</strong> ep.fr lists offers <strong>sellable in France</strong> (pool from all European countries, not only French companies); Phase 1 opens <strong>ep.fr ~124k / ep.es ~77k / ep.it ~51k</strong> (priced offers, incl. dual-platform); remaining countries (de ~195k / co.uk ~69k / nl ~39k / pl ~33k / pt ~21k etc.) ≈ 490k stay for later phases (see 2.2).</p>
+
+<h3>3.2 GMC Required Fields Check (7 fields)</h3>
+<table>
+  <tr><th>#</th><th>GMC field</th><th>Coverage</th><th>Status</th><th>Notes</th></tr>
+  <tr><td>1</td><td><strong>id</strong></td><td class="num">100%</td><td><span class="badge green">✅</span></td><td>offer UUID, present for all 3,495,171</td></tr>
+  <tr><td>2</td><td><strong>title</strong> (≤150)</td><td class="num">100% / 99.96%</td><td><span class="badge green">✅</span></td><td>avg 44 chars; 1,428 &gt;150 need truncation;<br>&lt;10 chars only 7,862 (0.62%), suggest min threshold (see 3.5)</td></tr>
+  <tr><td>3</td><td><strong>description</strong> (≤5000)</td><td class="num">~100% / 99.8%</td><td><span class="badge green">✅</span></td><td>avg 823 chars; 6,249 &gt;5000 need truncation;<br>&lt;50 chars only 61,148 (4.9%), suggest min threshold (see 3.5)</td></tr>
+  <tr><td>4</td><td><strong>link</strong></td><td class="num">100% constructible</td><td><span class="badge green">✅</span></td><td>slug_id 100% coverage → construct wlw.de own PDP URL (see 3.6);<br>data_external_url (87.5%) points to merchants' external sites, <strong>not applicable</strong> (self-traffic strategy)</td></tr>
+  <tr><td>5</td><td><strong>image_link</strong></td><td class="num">99.8%</td><td><span class="badge green">✅</span></td><td>3,489,619 have at least one image</td></tr>
+  <tr><td>6</td><td><strong>price</strong></td><td class="num">36.0%</td><td><span class="badge yellow">⚠️</span></td><td>17.1% are range prices (min≠max), decision needed</td></tr>
+  <tr><td>7</td><td><strong>availability</strong></td><td class="num">0%</td><td><span class="badge red">❌</span></td><td>No stock tracking; recommend fallback to in_stock for all</td></tr>
+</table>
+
+<h3>3.3 Price Format Deep-Dive</h3>
+<table>
+  <tr><th>Price type</th><th>Count</th><th>Share of priced</th><th>GMC assignment strategy</th></tr>
+  <tr><td>price_min only (no max)</td><td class="num">1,042,377</td><td class="num">82.9%</td><td>Use price_min directly</td></tr>
+  <tr><td>price_min = price_max</td><td class="num">1,003</td><td class="num">0.08%</td><td>Use directly (no difference)</td></tr>
+  <tr><td>price_min ≠ price_max (range)</td><td class="num">214,637</td><td class="num">17.1%</td><td>Recommended: use price_min</td></tr>
+</table>
+
+<p><strong>Range-price gap distribution (min≠max):</strong></p>
+<table>
+  <tr><th>Price ratio (max/min)</th><th>Count</th><th>Share</th><th>Recommendation</th></tr>
+  <tr><td>1-1.1x (negligible)</td><td class="num">19,399</td><td class="num">9.0%</td><td>Use min <span class="badge green">✅</span></td></tr>
+  <tr><td>1.1-1.5x</td><td class="num">86,156</td><td class="num">40.1%</td><td>Use min <span class="badge green">✅</span></td></tr>
+  <tr><td>1.5-2x</td><td class="num">35,230</td><td class="num">16.4%</td><td>Use min <span class="badge yellow">⚠️ review advised</span></td></tr>
+  <tr><td>2-5x</td><td class="num">40,750</td><td class="num">19.0%</td><td>Use min <span class="badge yellow">⚠️ needs confirmation</span></td></tr>
+  <tr><td>5-10x</td><td class="num">12,333</td><td class="num">5.7%</td><td>Use min <span class="badge red">⚠️ possibly too low</span></td></tr>
+  <tr><td>10x+</td><td class="num">20,769</td><td class="num">9.7%</td><td>Use min <span class="badge red">⚠️ severely low</span></td></tr>
+  <tr><td><strong>Total</strong></td><td class="num"><strong>214,637</strong></td><td class="num">100%</td><td></td></tr>
+</table>
+
+<h3>3.4 Currency Distribution</h3>
+<table>
+  <tr><th>Currency</th><th>Count</th><th>Share</th></tr>
+  <tr><td>EUR</td><td class="num">1,117,314</td><td class="num">88.8%</td></tr>
+  <tr><td>GBP</td><td class="num">58,623</td><td class="num">4.7%</td></tr>
+  <tr><td>CHF</td><td class="num">26,006</td><td class="num">2.1%</td></tr>
+  <tr><td>PLN</td><td class="num">17,686</td><td class="num">1.4%</td></tr>
+  <tr><td>Others (TRY/RON/CZK/HUF/DKK/SEK...)</td><td class="num">38,388</td><td class="num">3.0%</td></tr>
+</table>
+
+<!-- ==================== 3.5 Data Quality Validation ==================== -->
+<h3>3.5 Sampling Validation &amp; Dirty Data (2026-08-20)</h3>
+
+<p>Random sample of 30 priced offers manually checked: <strong>data is real and trustworthy</strong> — covers genuine products (e.g. gynaecological examination table £3,288, HECO screws €2.40, storage rack £925), with supplier name / price / currency / external URL mutually consistent. However, the following anomalies need cleaning before feed generation:</p>
+
+<table>
+  <tr><th>Anomaly type</th><th>Count</th><th>Share of priced</th><th>Handling</th></tr>
+  <tr><td>TEST/QA/Visable internal test accounts (TEST, Quality Assurance @ Visable Freelisting, 23 suppliers)</td><td class="num">~1,430</td><td class="num">0.11%</td><td><span class="badge red">Exclude</span> filter by supplier name / internal account blacklist</td></tr>
+  <tr><td>Price &lt; 1 currency unit (0.01~0.99, likely placeholder/test price)</td><td class="num">52,472</td><td class="num">4.2%</td><td><span class="badge yellow">Exclude advised</span> (EUR 46,627 majority)</td></tr>
+  <tr><td>Price &gt; 1,000,000 EUR (incl. dirty data like 8,000,120,000)</td><td class="num">335 (EUR)</td><td class="num">0.03%</td><td><span class="badge yellow">Set cap</span> exclude &gt;1M EUR (HUF/TRL etc. judged after FX conversion)</td></tr>
+  <tr><td>Abnormal supplier names (trailing underscore like JSB TRADING LTD_)</td><td class="num">few</td><td class="num">&lt;0.01%</td><td><span class="badge yellow">Exclude advised</span></td></tr>
+</table>
+
+<p><strong>Price percentiles (EUR priced offers, n=1,117,314):</strong> P1=€0.18 · P5=€1 · P25=€7.89 · P50=€29.99 · P75=€169.40 · P95=€2,703 · P99=€20,000 · MAX=€8,000,120,000 (dirty data)</p>
+
+<div class="card">
+  <h3>Data Cleaning Rules (before entering feed)</h3>
+  <ol>
+    <li><strong>Exclude internal test accounts:</strong> supplier name matching TEST / QA / Quality Assurance / Visable (internal) / trailing underscore</li>
+    <li><strong>Exclude extreme prices:</strong> data_price_min &lt; 1 or &gt; 1,000,000 EUR (other currencies converted at approximate FX rate)</li>
+    <li><strong>Exclude missing fields:</strong> empty title/description, missing image, missing slug_id</li>
+    <li><strong>Set title/desc minimum thresholds (new 2026-08-20):</strong> GMC has no hard minimum (only caps 150/5000), but for match quality: <code>title ≥ 10 chars</code> (7,862 total 0.62% / wlw 2,718 0.48%) + <code>desc ≥ 50 chars</code> (61,148 total 4.9% / wlw 26,543 4.7%). Sampling confirms short titles are mostly real model-number products (e.g. AKG K371, IC-A120E), not dirty data — the stricter gates title ≥ 20 / desc ≥ 100 are NOT recommended (would lose 6.5% / 12.9% of real offers); Phase 4 completes short titles with “brand + model + category” instead of excluding</li>
+    <li><strong>Net usable priced offers estimate:</strong> ~1,258,017 − 1,430 (test) − 52,472 (&lt;1) − 335 (&gt;1M) ≈ <strong>~1,204k</strong> (threshold ≥ 1 EUR recommended); after title/desc minimums, total further reduced by ~60k, wlw MVP side by ~29k (≈5%)</li>
+  </ol>
+</div>
+
+<!-- ==================== 3.6 link Field Validation ==================== -->
+<h3>3.6 link Field Validation: Own PDP URL Construction (2026-08-20)</h3>
+
+<div class="card">
+  <p><strong>Conclusion: link field capability = 100% constructible, all verified accessible.</strong> The GMC link must be a wlw.de own PDP URL (we drive traffic to ourselves, not to merchants' external sites). 87.5% of <code>data_external_url</code> points to merchants' external websites (e.g. <code>supplier-shop.com/product/xyz</code>), useless for GMC; own PDP URLs are constructed from slug_id with full coverage.</p>
+
+  <h3>wlw.de PDP URL Pattern (confirmed from production pages)</h3>
+  <pre>https://www.wlw.de/de/firma/{company_slug}-{company_slug_id}/produkte/{product_slug}-{product_slug_id}
+e.g. https://www.wlw.de/de/firma/mahr-gmbh-280744/produkte/weisslichtinterferometer-mit-ica-technologie-35874570</pre>
+
+  <table>
+    <tr><th>URL element</th><th>Data source</th><th>Coverage</th><th>Notes</th></tr>
+    <tr><td>Company slug_id</td><td>companies.companies.slug_id</td><td class="num">100%</td><td>e.g. 280744 (Mahr GmbH)</td></tr>
+    <tr><td>Company slug</td><td>slugify(company name) (lowercase / diacritic transliteration / punctuation to hyphen)</td><td class="num">11,840 companies</td><td>e.g. Mahr GmbH → mahr-gmbh; <strong>fault-tolerant: wrong slug + correct id verified HTTP 200</strong></td></tr>
+    <tr><td>Product slug_id</td><td>supplier_offers.offers.slug_id</td><td class="num">100% (all 3,495,171)</td><td>e.g. 35874570</td></tr>
+    <tr><td>Product slug</td><td>supplier_offers.revisions.snapshot_slug (latest version)</td><td class="num">39%</td><td>61% missing → <strong><a href="https://visable.atlassian.net/browse/ARISE-1239" target="_blank">ARISE-1239</a> already fixed</strong> (live 7/16): VCG read path falls back to slug_id, product URL segment degrades to <code>/produkte/{slug_id}</code> (still the <code>/firma/{company segment}/…</code> detail-page pattern, not a short path)</td></tr>
+  </table>
+
+  <h3>URL Accessibility Test (curl / WebFetch, 2026-08-20)</h3>
+  <table>
+    <tr><th>URL variant</th><th>Status</th><th>Conclusion</th></tr>
+    <tr><td><a href="https://www.wlw.de/de/firma/mahr-gmbh-280744/produkte/weisslichtinterferometer-mit-ica-technologie-35874570" target="_blank"><code>/firma/mahr-gmbh-280744/produkte/weisslichtinterferometer-...-35874570</code></a> (both slugs)</td><td><span class="badge green">HTTP 200</span></td><td>Full pattern works; page contains product name/description/price/company breadcrumb</td></tr>
+    <tr><td><a href="https://www.wlw.de/de/firma/mahr-gmbh-280744/produkte/35874570" target="_blank"><code>/firma/mahr-gmbh-280744/produkte/35874570</code></a> (product slug fallback)</td><td><span class="badge green">HTTP 200</span></td><td><a href="https://visable.atlassian.net/browse/ARISE-1239" target="_blank">ARISE-1239</a> fallback works; 61% of offers without slug use this path</td></tr>
+    <tr><td><a href="https://www.wlw.de/de/firma/maher-gmbh-280744/produkte/35874570" target="_blank"><code>/firma/maher-gmbh-280744/produkte/35874570</code></a> (wrong company slug)</td><td><span class="badge green">HTTP 200</span></td><td>Company slug is fault-tolerant; slug_id is the authoritative identifier, 0 redirects</td></tr>
+    <tr><td><a href="https://www.wlw.de/de/firma/280744/produkte/35874570" target="_blank"><code>/firma/280744/produkte/35874570</code></a> (company slug completely missing)</td><td><span class="badge red">HTTP 404</span></td><td>Company segment must be non-empty (any slug + correct id is enough)</td></tr>
+  </table>
+
+  <p><strong>Europages side (Phase-1 3 EP domain accounts, see 2.1):</strong> <code>europages.ep_products.prd_url</code> (87.5% coverage) is likewise the merchant external-site link, not directly usable; the EP own PDP URL pattern is <strong>verified</strong> (see 4.C: <code>/fr/company/{company_slug}-{company_slug_id}/products/{product_slug}-{product_slug_id}</code>, product segment can degrade to <code>/products/{slug_id}</code>).</p>
+</div>
+
+<!-- ==================== 3.7 Live Verification ==================== -->
+<h3>3.7 Live Verification: Priced offers show UI + JSON-LD, three-way consistent with DB (re-checked 2026-08-20)</h3>
+
+<div class="card">
+  <p><strong>Background (re-check 2026-08-20):</strong> The earlier spot check wrongly used the short path <code>/produkte/{slug_id}</code> (actually a <strong>product listing page</strong>, not a PDP), leading to the wrong conclusion “UI does not show price”. After live cross-verification (user correction + curl on raw HTML, using the full detail-page pattern <code>/firma/{company_slug}-{slug_id}/produkte/{product_slug}-{slug_id}</code>), <strong>priced offers show their price normally in the UI</strong>, consistent with DB / JSON-LD:</p>
+
+  <table>
+    <tr><th>Item</th><th>Database (Redshift)</th><th>Live page (wlw.de)</th><th>Conclusion</th></tr>
+    <tr><td>PMT Glasabfälle (user spot check)<br><a href="https://www.wlw.de/de/firma/pmt-produkt-marketing-technologietransfer-gmbh-22324717/produkte/36354509" target="_blank"><code>/firma/pmt-...-22324717/produkte/36354509</code></a></td><td>data_price_min = <strong>NULL</strong></td><td>No price on page (no main price area; no JSON-LD offers; other € on page are recommended products)</td><td><span class="badge green">Consistent</span> This offer belongs to the 64% unpriced group; random checks hit unpriced offers with 64% probability</td></tr>
+    <tr><td>JAKO Duschvorhangstange (random priced offer)<br><a href="https://www.wlw.de/de/firma/jako-design-in-edelstahl-inh-sarah-wagner-20026753/produkte/38496079" target="_blank"><code>/firma/jako-design-...-20026753/produkte/38496079</code></a></td><td>data_price_min = <strong>119 EUR</strong></td><td><strong>UI main price area shows “ab 119 €”</strong> (<code>data-test="product-price"</code>, NUXT payload also 119 EUR); <strong>JSON-LD Product schema contains <code>offers.price=“119”, priceCurrency=“EUR”, availability=InStock, sku=38496079</code></strong></td><td><span class="badge green">Consistent</span> UI / JSON-LD / DB all 119 = 119, all fields reconciled</td></tr>
+    <tr><td>Mahr Weißlichtinterferometer (Jira ticket sample)<br><a href="https://www.wlw.de/de/firma/mahr-gmbh-280744/produkte/weisslichtinterferometer-mit-ica-technologie-35874570" target="_blank"><code>/firma/mahr-gmbh-280744/produkte/...-35874570</code></a></td><td>data_price_min = <strong>NULL</strong></td><td>No price on page; no JSON-LD offers (other € on page are recommended products)</td><td><span class="badge green">Consistent</span></td></tr>
+    <tr><td>Something Different Wholesale (random priced offer)<br><a href="https://www.wlw.de/de/firma/something-different-wholesale-22308445/produkte/37346486" target="_blank"><code>/firma/something-different-...-22308445/produkte/37346486</code></a></td><td>data_price_min = <strong>2.08 GBP</strong></td><td><strong>UI main price area shows “2,43 €”</strong> (GBP → EUR FX conversion display; not seen for EUR offers); JSON-LD offers.price=2.08 + priceCurrency=GBP (original currency)</td><td><span class="badge yellow">⚠️ Currency mismatch</span> UI shows EUR-converted price, different from JSON-LD/DB (GBP original) → submitting original currency would mismatch (see conclusion ④)</td></tr>
+  </table>
+
+  <p><strong>Conclusions:</strong></p>
+  <ul>
+    <li><strong>Data-layer prices are real:</strong> the 36% priced share holds (3.5 sampled 30 offers randomly); it is normal that random online browsing shows no price — 64% are unpriced (page confirms no price), priced offers display normally in the UI (see ②)</li>
+    <li><strong>Re-check correction (2026-08-20): wlw PDPs with price display it in the UI, JSON-LD outputs it in sync — three-way consistent:</strong> priced offers → UI main price area (<code>data-test="product-price"</code>) shows “ab 119 €” / “8.212,50 €” / range offers “90,45 - 166,84 €” (min first, most prominent), while <code>Product.offers.price</code> outputs the same and matches the DB (119=119, 8212.5=8.212,50…); unpriced offers → no main price area in UI, no offers in JSON-LD (other € on page are recommended products). <strong>The earlier “UI does not show price” conclusion was wrong</strong> — caused by using the short path <code>/produkte/{slug_id}</code> (listing page); the correct detail pattern is <code>/firma/{company_slug}-{slug_id}/produkte/{product_slug}-{slug_id}</code></li>
+    <li><strong>GMC impact:</strong> ① Landing-page UI price + structured price both match the feed → <strong>price mismatch disapproval risk extremely low</strong>; ② Landing page outputs availability InStock, consistent with the feed-wide in_stock plan; ③ <strong>Official Landing page requirements “clearly show the product price” already met</strong> (UI shows “ab min €”), the previous compliance gap is closed (see 3.9); ④ ⚠️ <strong>New risk: non-EUR offers shown in EUR-converted UI</strong> (see ⑤)</li>
+    <li><strong>⚠️ Non-EUR currency conversion risk (new 2026-08-20, incl. GMC currency rule research):</strong> wlw priced offers: EUR 545,964 (95.6%), non-EUR ≈ 25,344 (4.4%, CHF 21,055 + GBP 3,803 + SEK 413 etc.) — the UI main price area converts to EUR via FX (verified 2.08 GBP → “2,43 €”), while JSON-LD / DB keep the original currency; <strong>the three EP Phase-1 account pools are almost all EUR (Redshift 2026-08-20): ep.fr 140,401/193 (99.86%), ep.es 80,652/14 (99.98%), ep.it 59,453/49 (99.93%) → only ~256 non-EUR</strong>, and ep.fr frontend verified to default to EUR display (PDP “16,00 €”, showroom “130,00 - 150,00 €”, same mechanism as wlw incl. FX); <strong>full rollout adds ~129k offers originally priced in non-EUR (GB 55,008 GBP / PL 30,433 PLN / TR 14,989 TRL etc., ~19% of EP priced offers)</strong> — ep.co.uk verified: UK company BEE 4 LIMITED's Industrial Labels listing 10 GBP → frontend “from 11,69 €” (GBP→EUR, same mechanism as wlw) → at full rollout, non-EUR offers are likewise converted to EUR using the frontend FX rate (see 2.2 Full-scale currency setup). <strong>GMC currency rules (official):</strong> ① feed price must carry an ISO 4217 currency code ([price] attribute <a href="https://support.google.com/merchants/answer/6324371" target="_blank">6324371</a>); ② amount and currency must match landing page / structured data / checkout <strong>three-way</strong> (product data spec <a href="https://support.google.com/merchants/answer/7052112" target="_blank">7052112</a> + mismatch fix <a href="https://support.google.com/merchants/answer/9773429" target="_blank">9773429</a>) — currency mismatch → price mismatch disapproval; ③ official supported currencies are listed per target country (<a href="https://support.google.com/merchants/answer/160637" target="_blank">160637</a>), non-target currencies may be supported via official <strong>Currency Conversion</strong> (multiple target countries see <a href="https://support.google.com/merchants/answer/14991840" target="_blank">14991840</a>), but local-currency submission performs better; ④ <strong>landing page auto-switching currency by visitor location + fixed feed currency = high mismatch risk</strong> (official auto-conversion restriction <a href="https://support.google.com/merchants/answer/6150127" target="_blank">6150127</a>; Shopify community: landing-page auto FX must be disabled). <strong>wlw/EP evidence:</strong> page currency selector defaults to EUR (screenshot 2026-08-20), URL has no currency parameter (<code>/de/</code>, <code>/fr/</code>, <code>/en/</code> fixed), non-EUR offers always display EUR-converted in UI (wlw 2.08 GBP → “2,43 €”; EP 10 GBP → “from 11,69 €”) → <strong>frontend display currency is uniformly EUR</strong>. → <strong>Conclusion: all accounts submit feeds uniformly in EUR</strong> (non-EUR original prices converted with the wlw/EP same-rate FX), consistent with each site's default UI and the three-way rule; submitting original currency is not recommended (UI shows EUR → currency mismatch is certain). To confirm: whether the currency selector auto-changes by visitor region (if yes, Googlebot may crawl a non-default-currency version, see 3.9 actions)</li>
+    <li><strong>Availability review conclusion (added 2026-08-20):</strong> ① <strong>It IS reviewed</strong> — required at feed level (already met) + landing-page-level consistency check: contradiction between displayed stock status and feed (page “add to cart” but feed out of stock, or page “sold out” but feed in stock) → mismatch disapproval (official Inaccurate availability status doc <a href="https://support.google.com/merchants/answer/9773127" target="_blank">9773127</a>); page <strong>not showing</strong> stock status → no mismatch (same logic as price); ② <strong>UI display is not mandatory</strong> — Landing page requirements only hard-require price “clearly show”, not an “in stock” label; but if the UI shows any stock status (label/button state), it must match the feed or it is a mismatch; ③ <strong><a href="https://www.seroundtable.com/google-merchant-center-out-of-stock-41100.html" target="_blank">2026-03-26 Google Landing page requirements update</a></strong> (SERoundtable): “products can successfully be added to a cart and delivered to a customer”; “out of stock landing page Buy button must be greyed out” (hidden/clickable both disallowed) — for wlw's inquiry model (no Buy button) this strengthens the substantive “not directly purchasable” risk (cross-confirmed with 3.7 availability conclusion); ④ <strong>structured data must be present and consistent with feed</strong>: the official price/availability mismatch fix doc (<a href="https://support.google.com/merchants/answer/9773429" target="_blank">9773429</a>) explicitly requires price and availability to align with page schema markup — biz-seo-sdk already outputs offers.availability=InStock, matching the feed-wide in_stock, <strong>no new development needed</strong>; ⚠️ reverse constraint: if out-of-stock offers go live in the future, feed + JSON-LD + UI must all change to the real status simultaneously, otherwise it constitutes an Inaccurate availability violation.</li>
+  </ul>
+</div>
+
+<!-- ==================== 3.8 Competitor Research ==================== -->
+<h3>3.8 Competitor Research: How B2B tiered prices appear in shopping channels (2026-08-20)</h3>
+
+<div class="card">
+  <p><strong>Background:</strong> When deciding “submit min or max for range-priced offers”, we researched how comparable B2B platforms (Made-in-China) present in shopping channels (Google Shopping anti-scrape → Bing Shopping live + real-site verification).</p>
+
+  <table>
+    <tr><th>Verification item</th><th>Result</th></tr>
+    <tr><td><a href="https://www.bing.com/shop?q=wholesale+stainless+steel+tumbler" target="_blank">Bing Shopping search “wholesale stainless steel tumbler”</a></td><td>Made-in-China wholesale products all show <strong>a single lowest price</strong>: $0.97 / $1.78 / $2.80 / $3.04 / $3.13 / $3.33 / $3.64 / $3.76 / $4.18 / $5.07 (all the lowest tier of tiered pricing), none shows max or a range</td></tr>
+    <tr><td>Made-in-China product page (<a href="https://cnyihi.en.made-in-china.com/" target="_blank">cnyihi.en.made-in-china.com</a> real site)</td><td>Page UI shows a <strong>tiered price table</strong> (US$3.14 / 2.86 / 2.72 / 2.57, MOQ tier highest, bulk tier lowest — same min/max semantics as wlw); <strong>JSON-LD offers.price = “2.57” (= min)</strong>, availability=InStock</td></tr>
+    <tr><td>Bulk-packaged product (“20 Skinny Straight Sublimation Tumblers”)</td><td>Shows $84.00 = <strong>package total of the minimum purchasable unit</strong> (20-pack) → the true meaning of Google's “total price of the minimum purchasable quantity”: submit the package total per minimum sale unit (case/set/20-pack); per-piece sales (MOQ=1 piece) submit the single-unit price = <strong>min</strong></td></tr>
+  </table>
+
+  <p><strong>Conclusion:</strong> ① Industry-standard B2B practice = submit and display <strong>min (lowest price)</strong> in the feed, and the page JSON-LD also outputs min — feeding min matches the landing page exactly (zero mismatch); ② Using max (MOQ-tier unit price) contradicts industry practice and the page JSON-LD → guaranteed mismatch; ③ Landing pages showing a tiered price table (incl. min) is industry standard, and min must be visible to users.</p>
+</div>
+
+<!-- ==================== 3.9 PDP Price Display Compliance ==================== -->
+<h3>3.9 PDP Price Display Compliance (official Landing Page Requirements, re-checked 2026-08-20)</h3>
+
+<div class="card">
+  <p><strong>Question (re-check 2026-08-20):</strong> Does the wlw PDP UI meet the official hard requirement “clearly show the product price”? The earlier conclusion “UI does not render price” was overturned by the 3.7 re-check — <strong>priced offers display normally in the UI (“ab 119 €” etc.)</strong>. Remaining compliance risks: ① inquiry model “not directly purchasable” ② non-EUR offers shown in EUR-converted UI vs feed original currency.</p>
+
+  <table>
+    <tr><th>Source</th><th>Key points</th></tr>
+    <tr><td>Google Merchant Center Help<br><strong><a href="https://support.google.com/merchants/answer/4752265" target="_blank">About landing page requirements</a></strong> (official doc <a href="https://support.google.com/merchants/answer/4752265" target="_blank">4752265</a>)</td><td>“<strong>Clearly show the product price on the landing page. The price should be easy to view, and should match your product data. If your landing page has multiple prices, the price of the advertised product must be the most prominent.</strong>”<br>Landing page <strong>must</strong> clearly show the price; with multiple prices (tier/range), the advertised product's price must be <strong>the most prominent</strong></td></tr>
+    <tr><td>Google Ads Community official forum (<a href="https://support.google.com/google-ads/thread/107143830" target="_blank">107143830</a>, Product Expert recommended answer)</td><td>“if you do not have a price on the landing page and the user can't purchase the product directly through your site then you can't use Google Merchant Center” — no price on landing page + not directly purchasable (inquiry model) → <strong>cannot use GMC</strong></td></tr>
+    <tr><td>price attribute definition (<a href="https://support.google.com/merchants/answer/6324371" target="_blank">6324371</a>)</td><td>“Submit an amount and currency that match the price on your landing page and the checkout pages”; variant-price scenario: “different prices for each of these variants” (multiple specs/prices can be split into variants)</td></tr>
+  </table>
+
+  <p><strong>Conclusion (after re-check):</strong> ① <strong>Official hard requirement already met</strong> — wlw priced PDPs show “ab min €” in the main price area (range offers show “min - max €”, min first and most prominent), satisfying “clearly show” + “advertised product price must be the most prominent”; unpriced offers (64%) have no price in the DB to begin with, so no display duty applies; ② feed uses <strong>min</strong>, three-way consistent with UI / JSON-LD (EUR offers verified 119=119, 8212.5=8.212,50 €) → <strong>price mismatch risk extremely low</strong>; ③ <strong>inquiry-model “not directly purchasable” risk remains independently</strong> — official “products can successfully be added to a cart and delivered” (2026-03-26 update) and the forum conclusion (107143830: no price + not directly purchasable → cannot use GMC) still apply; this is the #1 risk of this plan (cross-confirmed with 3.7 availability conclusion); ④ ⚠️ <strong>non-EUR currency conversion risk (new)</strong> — UI converts CHF/GBP/SEK etc. (~25.3k, 4.4%) to EUR via FX (verified 2.08 GBP → “2,43 €”), JSON-LD/DB keep the original; feed must decide the currency basis (see actions).</p>
+  <p><strong>Actions (updated after re-check):</strong> ① <strong>Remove the former “PDP front-end price display” new dependency</strong> (re-check 2026-08-20: already satisfied, no product-side development needed; prerequisites table updated); ② <strong>currency setup direction (2026-08-20): all accounts get independent feeds and independent target countries, feeds submit EUR uniformly</strong> — GMC rules (6324371 ISO 4217 / 7052112 three-way / 160637 supported currencies + Currency Conversion / 14991840 multiple target countries) require the feed currency to match the landing-page display, and all sites' frontends default to EUR (wlw.de, ep.fr, ep.co.uk all verified showing €; incl. UK-company GBP offer 10 GBP → “from 11,69 €” conversion evidence) → no multi-currency need, original-currency submission would mismatch for sure; non-Eurozone markets (UK/CH/SE/PL…) are covered by Google Currency Conversion displaying the local currency automatically; <strong>pool original-currency distribution (Redshift 2026-08-20):</strong> wlw.de non-EUR 25,344 (4.4%), Phase-1 EP three accounts 256 (0.09%), <strong>full-rollout new EP non-EUR ~129k (GB 55,008 GBP / PL 30,433 PLN / TR 14,989 TRL / RO 8,977 RON / CZ 5,405 CZK / DK 4,331 DKK / CH 4,899 CHF / HU 4,489 HUF etc., ~19% of EP priced offers)</strong>; three items to confirm (before R1): a) source and refresh frequency of the wlw/EP frontend FX rate (feed conversion must use the same basis); b) whether the “Währung und Sprache” selector auto-changes by visitor region (if yes, Googlebot may crawl a non-EUR version; wlw must provide a stable default version); c) whether the difference between converted price and JSON-LD original currency affects crawler validation (observe live); ③ if a/b cannot be confirmed, fallback: Phase 1 skips non-EUR offers (~25.6k, 0.04% of total); at full rollout TRL is evaluated separately (high volatility)</p>
+</div>
+
+<!-- ==================== 4. Decision Plans for the Three Data Gaps ==================== -->
+<h2>4. Decision Plans for the Three Data Gaps</h2>
+
+<div class="card">
+<h3>A) availability (stock status)</h3>
+<p><strong>Problem:</strong> wlw is an inquiry platform without real-time stock tracking. GMC requires in_stock / out_of_stock / preorder / backorder.</p>
+<p><strong>Recommended solution: set all active offers to <code>in_stock</code> uniformly</strong></p>
+<ul>
+  <li>Rationale: offers that are published and not deleted can be treated as “sellable / inquiry-able”</li>
+  <li>Impact: simple and direct, no downside; if actually out of stock, the merchant replies after the buyer sends an inquiry</li>
+  <li>Risk: a very small number of discontinued-but-still-displayed offers may not reflect reality → can add supplier-flagged stock signals later</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>B) price format (range prices)</h3>
+<p><strong>Problem:</strong> the DB stores price_min / price_max ranges; GMC requires a single fixed price.</p>
+<p><strong>Recommended solution: use price_min (supported by industry evidence + official requirements)</strong></p>
+<ul>
+  <li>82.9% of priced offers have only price_min (single value already), no extra handling needed</li>
+  <li>49.1% of range offers have gap ≤ 1.5x, so using min deviates from the real price controllably</li>
+  <li><strong>Industry evidence (2026-08-20, see 3.8):</strong> B2B platforms like Made-in-China submit and display <strong>the lowest price (min)</strong> in shopping channels, and the page JSON-LD also outputs min — feeding min matches the landing page exactly, zero mismatch risk; using max (MOQ-tier unit price) contradicts industry practice and inevitably mismatches</li>
+  <li><strong>Official landing page requirement (see 3.9):</strong> “clearly show the product price” is met (re-check 2026-08-20: priced PDP UI already shows “ab min €”, no new dependency) — feeding min is three-way consistent with UI / JSON-LD; range offers show “min - max €” in the UI with min first and most prominent</li>
+  <li><strong>Exception handling:</strong> the 20,769 offers with gap &gt; 10x should be <strong>skipped (not uploaded)</strong> — the UI shows a min-max range; when the gap is too large, min deviates heavily from the actual deal price, hurting CTR and review perception (note: the earlier “inconsistent with page JSON-LD” rationale does not hold — JSON-LD outputs min, same as the feed)</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>C) link (product landing page URL)</h3>
+<p><strong>Problem:</strong> data_external_url points to suppliers' external sites (e.g. <code>https://supplier-shop.com/product/xyz</code>); GMC requires the URL to be a PDP on a self-owned verified domain — <strong>we want to drive traffic to ourselves, not to merchant sites</strong>.</p>
+<p><strong>Recommended solution: construct wlw.de own PDP URLs (verified, see 3.6)</strong></p>
+<p>wlw.de PDP URL pattern: <code>https://www.wlw.de/de/firma/{company_slug}-{company_slug_id}/produkte/{product_slug}-{product_slug_id}</code></p>
+<ul>
+  <li>Three elements: company slug_id (companies.slug_id, 100%) + company slug (slugify company name) + product slug_id (offers.slug_id, 100%)</li>
+  <li><strong>Missing product slug (61%) is not blocking:</strong> <a href="https://visable.atlassian.net/browse/ARISE-1239" target="_blank">ARISE-1239</a> (live 7/16) VCG read path falls back to slug_id; <code>/produkte/{slug_id}</code> verified HTTP 200</li>
+  <li><strong>Company slug fault tolerance:</strong> wrong slug + correct slug_id verified HTTP 200 (slug_id is authoritative); only a completely missing company segment 404s</li>
+  <li><strong>EP side (verified 2026-08-20):</strong> ep_products.prd_url is likewise a merchant external link and unusable; the EP own PDP URL pattern is <strong>verified</strong>: <code>https://www.europages.fr/fr/company/{company_slug}-{company_slug_id}/products/{product_slug}-{product_slug_id}</code> (same structure as wlw) — product segment can degrade to <code>/products/{slug_id}</code> (verified 200); company slug required (404 without it); frontend UI mirrors wlw (<code>data-test="product-price"</code>, EUR display, range min first); all Phase-1 EP accounts (ep.it/es/fr) rely on this pattern; EP domains are assigned by target-sales-country site (<strong>country-site model, confirmed 2026-08-20: ep.XX lists offers sellable in that country; pool from all European countries, not only that country's companies</strong>); each EP account completes domain verification in its own GMC account (see 1. Prerequisites)</li>
+  <li><strong>⚠️ GMC domain verification:</strong> wlw.de must complete domain verification in GMC (prerequisite <a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a>)</li>
+</ul>
+</div>
+
+<!-- ==================== 5. Technical Plan ==================== -->
+<h2>5. Technical Plan</h2>
+
+<h3>5.1 Feed Structure (separate feeds per account/domain)</h3>
+<pre>
+id            → offer.id (UUID)
+title         → data_name (truncate to 150 if needed)
+description   → data_description (plain text, truncate to 5000 if needed)
+link          → per account/domain:
+                 # wlw.de account: https://www.wlw.de/de/firma/{company_slug}-{company_slug_id}/produkte/{product_slug}-{slug_id}
+                 #   product slug missing → fallback: .../produkte/{slug_id} (<a href="https://visable.atlassian.net/browse/ARISE-1239" target="_blank">ARISE-1239</a>, verified 200)
+                 # ep.it / ep.es / ep.fr accounts: https://www.europages.{cc}/{lang}/company/{company_slug}-{company_slug_id}/products/{product_slug}-{slug_id}  (verified 200, 2026-08-20)
+                 #   product slug missing → fallback: .../products/{slug_id} (verified 200); company slug required (404 without)
+image_link    → first image URL from supplier_offers.images
+price         → {data_price_min} EUR (unified EUR; non-EUR original prices converted at the wlw/EP frontend FX rate before submission, e.g. "49.99 EUR")
+                 # min = industry practice (B2B like Made-in-China submits lowest price) + consistent with page JSON-LD
+                 # range prices also use min; skip gap>10x (mean/average would mismatch the page → mismatch)
+availability  → in_stock (static)
+                 # JSON-LD (biz-seo-sdk) already outputs availability=InStock; feed=JSON-LD=landing page three-way consistent (official requires price/availability to align with schema markup, <a href="https://support.google.com/merchants/answer/9773429" target="_blank">9773429</a>)
+                 # Phase: all in_stock static; future out-of-stock offers must sync real status across feed+JSON-LD+UI (<a href="https://www.seroundtable.com/google-merchant-center-out-of-stock-41100.html" target="_blank">2026-03</a> out of stock must grey out Buy button, <a href="https://support.google.com/merchants/answer/9773127" target="_blank">9773127</a>)
+identifier_exists → false (declare when no brand/GTIN/MPN)
+</pre>
+
+<h3>5.2 Data Processing Pipeline</h3>
+<div class="timeline">
+  <div class="timeline-item">
+    <div class="phase">Phase 1: Data extraction</div>
+    <p>SQL from supplier_offers.offers + JOIN companies → export the candidate offer list</p>
+  </div>
+  <div class="timeline-item">
+    <div class="phase">Phase 2: Field cleaning</div>
+    <p>title/description truncation + price single-valuing + PDP URL construction + drop first image</p>
+  </div>
+  <div class="timeline-item">
+    <div class="phase">Phase 3: Feed generation</div>
+    <p>Generate XML or Google Sheets feed per GMC spec</p>
+  </div>
+  <div class="timeline-item">
+    <div class="phase">Phase 4: Upload &amp; validation</div>
+    <p>GMC Dashboard / API upload → wait for review → handle Disapprovals</p>
+  </div>
+  <div class="timeline-item">
+    <div class="phase">Phase 5: Incremental updates</div>
+    <p>Set up incremental feed updates (new / modified / removed)</p>
+  </div>
+</div>
+
+<h3>5.3 Conditional Required Fields</h3>
+<table>
+  <tr><th>Field</th><th>Status</th><th>Solution</th></tr>
+  <tr><td>brand</td><td><span class="badge yellow">To confirm</span></td><td>Offer data has no brand field; can declare <code>identifier_exists=false</code></td></tr>
+  <tr><td>GTIN</td><td><span class="badge red">None</span></td><td>B2B platforms usually have no GTIN; declare <code>identifier_exists=false</code></td></tr>
+  <tr><td>MPN</td><td><span class="badge red">None</span></td><td>Same as above</td></tr>
+  <tr><td>google_product_category</td><td><span class="badge yellow">Optional</span></td><td>Can map cpv_category_id → Google category; not required but recommended</td></tr>
+</table>
+
+<!-- ==================== 6. AB Increment Estimate ==================== -->
+<h2>6. AB Increment Estimate</h2>
+
+<div class="card">
+<h3>Target: AB2 +5 (full rollout) breakdown</h3>
+<table>
+  <tr><th>Metric</th><th>Phase 1 (4 domains ~805k)</th><th>Full rollout (~1,258k)</th><th>Source</th></tr>
+  <tr><td>Phase-1 4-domain priced offers (wlw.de + ep.it/es/fr)</td><td class="num">~805k</td><td class="num">~1,258k (1.56x)</td><td>Redshift query 2026-08-20</td></tr>
+  <tr><td>Google Shopping Organic CTR (estimate)</td><td class="num">~0.5-1.5%</td><td class="num">~0.5-1.5%</td><td>Industry benchmark (B2B is low)</td></tr>
+  <tr><td>Daily Shopping clicks (estimated)</td><td class="num">~4,000-12,100</td><td class="num">~6,300-18,900</td><td>Priced offers × CTR</td></tr>
+  <tr><td>CVR → AB (reference mean)</td><td class="num">~2-4%</td><td class="num">~2-4%</td><td>SEO channel CVR baseline</td></tr>
+  <tr><td>Daily AB (estimated)</td><td class="num">~80-480</td><td class="num">~125-750</td><td></td></tr>
+  <tr><td>AB→AB2 CVR</td><td class="num">~1-3%</td><td class="num">~1-3%</td><td>SEO channel AB→AB2 baseline</td></tr>
+  <tr><td>Daily AB2 increment (estimated)</td><td class="num">~0.8-14</td><td class="num">~1.3-22.5</td><td>Mid-range ~5-7</td></tr>
+</table>
+<p><strong>Target:</strong> Phase 1 <strong>+3 AB2/day</strong> (mid-range), full rollout <strong>+5 AB2/day</strong> (slightly above mid-range) — full-rollout volume 1,258k is 1.56x Phase 1, linear extrapolation of AB2 increment mid-range ≈5.5; +5 balances long-tail traffic and review volatility, neither conservative (no +1 floor) nor aggressive (not betting on the 22 ceiling). Tune against actual data 4 weeks after launch.</p>
+</div>
+
+<!-- ==================== 7. Recommended Execution Plan ==================== -->
+<h2>7. Recommended Execution Plan &amp; Timeline</h2>
+
+<table>
+  <tr><th>Week</th><th>Actions</th><th>Deliverable</th></tr>
+  <tr><td>W34 (8/17-23)</td>
+    <td>① Confirm the 4 GMC accounts are opened (wlw.de + ep.it/es/fr, <a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a>/<a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a>/<a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a>)<br>② Confirm verification status of the 4 domains<br>③ Confirm the EP own PDP URL pattern</td>
+    <td>Prerequisite checklist (one page)</td>
+  </tr>
+  <tr><td>W35 (8/24-30)</td>
+    <td>① Phase 1 feed generation &amp; upload (single-price offers across 4 accounts)<br>② Monitor GMC review status<br>③ Handle Feed Disapprovals</td>
+    <td>~678k single-price offers live on 4 accounts</td>
+  </tr>
+  <tr><td>W36-W37 (8/31-9/13)</td>
+    <td>① Phase 2 range-price upload (4 accounts)<br>② Set up incremental update mechanism<br>③ Shop Ads evaluation (optional)</td>
+    <td>Range-price offers + incremental pipeline</td>
+  </tr>
+  <tr><td>W38-W40 (9/14-10/4)</td>
+    <td>① Phase 3 remaining EP domain accounts (de/co.uk/nl/com etc.)<br>② Data review (after 4 weeks)<br>③ Performance tuning</td>
+    <td>Full rollout + performance report</td>
+  </tr>
+</table>
+
+<!-- ==================== 8. Risk Register ==================== -->
+<h2>8. Risk Register</h2>
+
+<table>
+  <tr><th>Risk</th><th>Impact</th><th>Probability</th><th>Mitigation</th></tr>
+  <tr><td>GMC accounts/domains not verified</td><td>Cannot upload</td><td>Medium</td><td>Confirm 4 accounts + 4 domain verification status first (<a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a>/<a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a>/<a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a>); EP own PDP URL pattern already verified (see 4.C)</td></tr>
+  <tr><td>Using min for range prices triggers Disapproval</td><td>Partial deactivation</td><td>Low-Medium</td><td>Review the ~20k offers with gap&gt;10x, then decide to skip</td></tr>
+  <tr><td><strong>Tiered-price max/min gap too large but still submitting min → customer complaints (new 2026-08-20)</strong></td><td>Buyers send inquiries at the displayed min price but close at a higher tier (MOQ tier); the price gap causes complaints/trust issues (sensitive in B2B); 20,769 offers with gap&gt;10x already skipped, 1.5x-10x range offers still use min</td><td>Medium</td><td>After launch, monitor inquiry complaints and deal-price gaps; for larger gaps (e.g. &gt;3x): a) skip in sync; b) confirm with the product side to submit max/mean instead; c) UI “ab min €” already implies the lowest-price semantics; add tiered-price explanation copy if needed</td></tr>
+  <tr><td>PDP landing page and price mismatch</td><td>Disapproval</td><td>Medium</td><td>Ensure the price shown on the landing page matches the feed</td></tr>
+  <tr><td>Stock status inconsistent with feed (out-of-stock scenario)</td><td>Page display contradicts real stock → Inaccurate availability violation (<a href="https://support.google.com/merchants/answer/9773127" target="_blank">9773127</a>) / poor experience when users click but cannot buy</td><td>Low (Phase: all in_stock + UI shows no stock)</td><td>No action needed for the static in_stock plan; before future out-of-stock offers go live, define the stock sync mechanism first: feed + JSON-LD + UI three-way consistent, out of stock must grey out buy/inquiry buttons (<a href="https://www.seroundtable.com/google-merchant-center-out-of-stock-41100.html" target="_blank">2026-03 new requirement</a>)</td></tr>
+  <tr><td>Entry from Chinese-speaking countries but descriptions all in German</td><td>Low conversion</td><td>Low</td><td>German is 57%; GMC targets by target country</td></tr>
+  <tr><td>B2B platform performance in Shopping</td><td>CTR lower than C2C/B2C</td><td>High</td><td>Benchmark already discounts B2B; target raised to mid-range (full rollout +5, Phase 1 +3)</td></tr>
+  <tr><td>Non-EUR offers shown in EUR-converted UI (wlw.de ~25.3k 4.4%; Phase-1 EP three accounts ~256 0.09%; full-rollout new ~129k, ~19% of EP priced)</td><td>Feed submitted in original currency → landing page UI shows EUR-converted price, currency/amount mismatch → price mismatch disapproval (GMC rules: 6324371 / 7052112 / 160637)</td><td>Low (after feeds unified to EUR); Medium after full rollout (~129k need FX conversion, TRL volatile)</td><td><strong>All accounts submit feeds uniformly in EUR</strong> (non-EUR original prices converted at the wlw/EP same-rate FX, consistent with UI) — direction set (see 3.7 ⑤ / 3.9 actions / 2.2 full-scale currency setup); to confirm: FX source/refresh frequency, whether the currency selector auto-changes by region (if yes, escalate to High), confirm before R1; TRL evaluated separately at full rollout; skip per country pool if unconfirmable</td></tr>
+  <tr><td>Harry only takes over the new project at end of August</td><td>Schedule delay</td><td>Low</td><td>Plan first; data preparation in parallel</td></tr>
+</table>
+
+<!-- ==================== 9. Appendix ==================== -->
+<h2>9. Appendix: SQL Data Sources</h2>
+
+<h3>Core extraction SQL</h3>
+<pre>
+-- Priced wlw.de GMC-ready offers (incl. link construction elements)
+SELECT so.id, so.data_name, so.data_description,
+       so.data_price_min, so.data_price_cur,
+       so.slug_id AS product_slug_id,  -- product slug_id (required for link, 100%)
+       cc.slug_id AS company_slug_id,  -- company slug_id (required for link, 100%)
+       cc.name AS company_name,        -- company slug = slugify(name)
+       r.snapshot_slug AS product_slug -- product slug (39% have it; link uses pure slug_id when missing)
+FROM supplier_offers.offers so
+JOIN companies.companies cc ON so.supplier_id = cc.supplier_facts_uuid
+LEFT JOIN (
+  SELECT offer_id, snapshot_slug,
+         ROW_NUMBER() OVER (PARTITION BY offer_id ORDER BY update_time DESC) rn
+  FROM supplier_offers.revisions
+) r ON r.offer_id = so.id AND r.rn = 1
+WHERE so.delete_time IS NULL
+  AND so.publish_time IS NOT NULL
+  AND so.data_price_min IS NOT NULL AND so.data_price_min > 0
+  AND cc.platform_wlw = true
+  AND so.data_name IS NOT NULL AND LENGTH(so.data_name) <= 150
+  AND so.data_description IS NOT NULL AND LENGTH(so.data_description) <= 5000
+  AND EXISTS (SELECT 1 FROM supplier_offers.images si
+              WHERE si.offer_data_images = so.id)
+  AND (so.data_price_max IS NULL OR so.data_price_min = so.data_price_max)
+  AND so.data_price_cur = 'EUR';
+-- → ~389k (EUR only + single price, for MVP)
+-- Relaxing to non-EUR + single price → ~478k (Phase-1 wlw.de single-price, all currencies)
+-- link construction: https://www.wlw.de/de/firma/{slugify(company_name)}-{company_slug_id}
+--           /produkte/{product_slug}-{product_slug_id}  (with slug)
+--           /produkte/{product_slug_id}                 (no slug, ARISE-1239 fallback, verified 200)
+</pre>
+
+<h3>Phase-1 4-domain distribution SQL (2026-08-20)</h3>
+<pre>
+-- Split by domain account (wlw=true all go to wlw.de; EP assigned to ep.XX by target-sales-country site (lists offers sellable in that country, pool from all European countries); ep counts non-wlw offers only to avoid duplicates)
+SELECT CASE WHEN cc.platform_wlw THEN 'wlw.de'
+            WHEN cc.country = 'FR' THEN 'ep.fr'
+            WHEN cc.country = 'ES' THEN 'ep.es'
+            WHEN cc.country = 'IT' THEN 'ep.it' END AS domain,
+       so.data_price_kind, COUNT(*) AS n
+FROM supplier_offers.offers so
+JOIN companies.companies cc ON so.supplier_id = cc.supplier_facts_uuid
+WHERE so.delete_time IS NULL AND so.publish_time IS NOT NULL
+  AND so.data_price_min IS NOT NULL AND so.data_price_min > 0
+  AND (cc.platform_wlw OR (cc.platform_ep AND cc.country IN ('FR','ES','IT')))
+GROUP BY 1, 2;
+-- Phase-1 total 804,530 priced offers (single fixed+from ~678k + range ~124k, ~110k after skipping gap>10x)
+</pre>
+
+<h3>Data validation SQL scripts</h3>
+<pre>
+-- Price range gap check
+SELECT so.id, so.data_price_min, so.data_price_max,
+       so.data_price_max / NULLIF(so.data_price_min, 0) AS price_ratio
+FROM supplier_offers.offers so
+WHERE so.delete_time IS NULL AND so.publish_time IS NOT NULL
+  AND so.data_price_min IS NOT NULL AND so.data_price_min > 0
+  AND so.data_price_max IS NOT NULL AND so.data_price_max > 0
+  AND so.data_price_min != so.data_price_max
+  AND so.data_price_max / NULLIF(so.data_price_min, 0) > 10;
+-- → 20,769 offers with gap>10x need review
+</pre>
+
+<hr>
+<p class="footnote" style="text-align:center;margin-top:30px;">
+  Data sources: Redshift Production (2026-08-20) · Redash adhoc queries · Prepared by: Jolyne Zhang<br>
+  Background: Teams chat (Jolyne-Anna, 7/23-8/7) · UC-387 Jira · UC-330 (Anna → Muke data request)
+</p>
+
+<!-- ================================================================
+     中文版（Chinese Version）
+     ================================================================ -->
+
+<h1>UC-387: GMC Enablement — Upload Priced PDPs（需求方案）</h1>
 <p style="font-size:16px;color:#5f6368;">Shopping Organic 渠道开通 · 目标 AB2 +5（推全） · Epic 4: PDP 增长计划 (UC-377)</p>
 
 <div class="meta">
   <strong>编制日期：</strong>2026-08-20 &nbsp;|&nbsp;
-  <strong>Reporter：</strong>Jolyne Zhang (原 Assignee: Anna Freddi → 移交) &nbsp;|&nbsp;
+  <strong>Reporter：</strong>Jolyne Zhang &nbsp;|&nbsp;
   <strong>优先级：</strong>P1 &nbsp;|&nbsp;
   <strong>Dependency Scope：</strong>External &nbsp;|&nbsp;
   <strong>前置依赖：</strong><span class="dep"><a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a></span> <span class="dep"><a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a></span> <span class="dep"><a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a></span>
@@ -263,7 +729,6 @@
   <p><strong>行动（复核后更新）：</strong>① <strong>移除原“PDP 前端展示价格”新增依赖</strong>（2026-08-20 复核已满足，无需产品侧开发，前置依赖表已更新）；② <strong>货币设置定案方向（2026-08-20）：全量账号独立 feed、独立 target country，feed 统一 EUR 提交</strong>——GMC 规则（6324371 ISO 4217 / 7052112 三方一致 / 160637 支持货币+Currency Conversion / 14991840 多 target country）要求 feed 币种与落地页展示一致，而所有站前端默认展示均为 EUR（wlw.de、ep.fr、ep.co.uk 均实测 UI 显示 €；含英国公司 GBP 原币品 10 GBP → “from 11,69 €” 换算实证）→ 无多币种需求，原币提交必 mismatch；非欧元国家市场（UK/CH/SE/PL…）由 Google Currency Conversion 自动按当地货币展示；<strong>品池原币分布（Redshift 2026-08-20）：</strong>wlw.de 非 EUR 25,344（4.4%）、第一期 EP 三账号 256（0.09%）、<strong>推全新增 EP 非 EUR ~129k（GB 55,008 GBP / PL 30,433 PLN / TR 14,989 TRL / RO 8,977 RON / CZ 5,405 CZK / DK 4,331 DKK / CH 4,899 CHF / HU 4,489 HUF 等，占 EP 带价品 ~19%）</strong>；待确认三项（R1 前）：a) wlw/EP 前端换算汇率来源与更新频率（feed 换算需同口径）；b) “Währung und Sprache” 选择器是否按访客地区自动变（若自动变，Google 爬虫可能抓到非 EUR 版本，需 wlw 提供稳定默认版本）；c) 换算后价格与 JSON-LD 原币差异是否影响爬虫校验（实测观察）；③ 若 a/b 无法确认，降级方案：第一期 skip 非 EUR 品（~25.6k，占总量 0.04%）；推全时 TRL 单独评估（波动大）</p>
 </div>
 
-
 <!-- ==================== 4. 三大数据差距决策方案 ==================== -->
 <h2>4. 三大数据差距决策方案</h2>
 
@@ -361,7 +826,7 @@ identifier_exists → false (无 brand/GTIN/MPN 时声明)
   <tr><td>google_product_category</td><td><span class="badge yellow">可选</span></td><td>可映射 cpv_category_id → Google 分类; 非必填但推荐</td></tr>
 </table>
 
-<!-- ==================== 5. AB 增量测算 ==================== -->
+<!-- ==================== 6. AB 增量测算 ==================== -->
 <h2>6. AB 增量测算</h2>
 
 <div class="card">
