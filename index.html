@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>UC-387 GMC Enablement: Upload Priced PDPs - 需求方案</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1100px; margin: 0 auto; padding: 20px; background: #f8f9fa; color: #333; line-height: 1.6; }
+  h1 { color: #1a73e8; border-bottom: 2px solid #1a73e8; padding-bottom: 10px; }
+  h2 { color: #1967d2; margin-top: 30px; border-bottom: 1px solid #dadce0; padding-bottom: 6px; }
+  h3 { color: #5f6368; margin-top: 20px; }
+  .meta { background: #e8f0fe; padding: 15px; border-radius: 8px; margin: 15px 0; }
+  .meta strong { color: #1a73e8; }
+  table { border-collapse: collapse; width: 100%; margin: 15px 0; font-size: 14px; }
+  th, td { border: 1px solid #dadce0; padding: 10px 12px; text-align: left; }
+  th { background: #f1f3f4; font-weight: 600; }
+  tr:hover { background: #f8f9fa; }
+  .num { text-align: right; font-family: 'SF Mono', monospace; }
+  .highlight { background: #e6f4ea; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
+  .warn { background: #fce8e6; padding: 2px 6px; border-radius: 4px; }
+  .info { background: #e8f0fe; padding: 2px 6px; border-radius: 4px; }
+  .card { background: white; border-radius: 8px; padding: 20px; margin: 15px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .flex { display: flex; gap: 20px; flex-wrap: wrap; }
+  .stat { flex: 1; min-width: 180px; background: white; border-radius: 8px; padding: 15px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .stat .value { font-size: 28px; font-weight: 700; color: #1a73e8; }
+  .stat .label { font-size: 13px; color: #5f6368; margin-top: 4px; }
+  .stat.warn-stat .value { color: #ea4335; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+  .badge.green { background: #e6f4ea; color: #137333; }
+  .badge.yellow { background: #fef7e0; color: #b06000; }
+  .badge.red { background: #fce8e6; color: #c5221f; }
+  .timeline { border-left: 3px solid #1a73e8; padding-left: 20px; margin: 15px 0; }
+  .timeline-item { margin: 15px 0; }
+  .timeline-item .phase { font-weight: 700; color: #1a73e8; }
+  .dep { background: #fef7e0; padding: 3px 8px; border-radius: 4px; margin: 2px; display: inline-block; font-size: 13px; }
+  pre { background: #f1f3f4; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 13px; }
+  .footnote { font-size: 13px; color: #5f6368; }
+</style>
+</head>
+<body>
+
+<h1>UC-387: GMC Enablement — Upload Priced PDPs</h1>
+<p style="font-size:16px;color:#5f6368;">Shopping Organic 渠道开通 · 目标 AB2 +5（推全） · Epic 4: PDP 增长计划 (UC-377)</p>
+
+<div class="meta">
+  <strong>编制日期：</strong>2026-08-20 &nbsp;|&nbsp;
+  <strong>Reporter：</strong>Jolyne Zhang (原 Assignee: Anna Freddi → 移交) &nbsp;|&nbsp;
+  <strong>优先级：</strong>P1 &nbsp;|&nbsp;
+  <strong>Dependency Scope：</strong>External &nbsp;|&nbsp;
+  <strong>前置依赖：</strong><span class="dep">UC-351</span> <span class="dep">UC-352</span> <span class="dep">UC-362</span>
+</div>
+
+<!-- ==================== 1. 前置依赖与风险 ==================== -->
+<h2>1. 前置依赖与风险</h2>
+
+<table>
+  <tr><th>依赖</th><th>说明</th><th>状态</th></tr>
+  <tr><td>UC-351</td><td>GMC 账号开通 / 配置——<strong>按域名单开账号（2026-08-20 确认）：第一期 4 个账号 = wlw.de + europages.it / europages.es / europages.fr</strong></td><td><span class="badge yellow">待确认</span></td></tr>
+  <tr><td>UC-352</td><td>GMC 域名验证——第一期 4 域名（wlw.de + europages.it + europages.es + europages.fr），各账号验证各自域名</td><td><span class="badge yellow">待确认</span></td></tr>
+  <tr><td>UC-362</td><td>GMC Feed 配置基础建设</td><td><span class="badge yellow">待确认</span></td></tr>
+  <tr><td>PDP URL 构造</td><td>wlw.de 侧 slug_id → URL 映射 <strong>已验证</strong>（2026-08-20 实测 200）</td><td><span class="badge green">✅ 已验证</span></td></tr>
+  <tr><td>PDP 前端展示价格</td><td>官方 Landing page requirements 硬性要求（4752265 “clearly show the product price”）；PDP UI 显示 <strong>min 主价格</strong>（或阶梯表，min 最显眼），与 feed/JSON-LD 一致；biz-seo-sdk JSON-LD 已输出 min 无需改，仅 UI 渲染</td><td><span class="badge red">新增依赖</span> 产品侧</td></tr>
+  <tr><td><strong>EP 域名验证（第一期：europages.it / europages.es / europages.fr）</strong></td><td><strong>必需（2026-08-20 确认：确实要上传 europages 商品，且按域名单开账号）</strong>——GMC 要求 feed 中 <code>link</code> 指向的域名必须在<strong>该域名自己的账号</strong>内完成“验证 + 声明”（verify and claim website）：每个 EP 域名开独立账号、各自验证各自域名；EP 域名按公司注册国归属（<strong>国家站模式，2026-08-20 确认；ep.fr=法国公司品 ~124k / ep.es=西班牙 ~77k / ep.it=意大利 ~51k，量级见 4.1</strong>）；未验证 → link 报 mismatched domain、商品不收录。链路：先确认 EP 自有 PDP URL 模式（见 3.C）→ 各账号完成域名验证 → 各域名品即可上传；其余 EP 国家域名（de ~195k / co.uk ~69k / nl ~39k 等 ≈ 490k）后续阶段再开账号</td><td><span class="badge red">必需</span> 第一期前置</td></tr>
+  <tr><td>Feed 更新机制</td><td>增量更新 / 全量刷新的方案设计</td><td><span class="badge yellow">需技术设计</span></td></tr>
+</table>
+
+<!-- ==================== 2. 数据全景 ==================== -->
+<h2>2. 数据全景分析</h2>
+
+<div class="flex">
+  <div class="stat"><div class="value">3,495,171</div><div class="label">在线活跃 Offer</div></div>
+  <div class="stat"><div class="value">1,258,017</div><div class="label">有价格 (36.0%)</div></div>
+  <div class="stat"><div class="value">1,250,823</div><div class="label">GMC 基础达标 (99.4%)</div></div>
+  <div class="stat warn-stat"><div class="value">7,194</div><div class="label">字段需处理 (0.6%)</div></div>
+</div>
+
+<h3>2.1 平台分布 (有价格 Offer)</h3>
+<table>
+  <tr><th>平台</th><th>有价格 Offer</th><th>占比</th><th>GMC Ready*</th></tr>
+  <tr><td>wlw.de (wlw=true)</td><td class="num">568,187</td><td class="num">45.2%</td><td class="num">566,668 (99.7%)</td></tr>
+  <tr><td>europages (ep=true)</td><td class="num">743,213</td><td class="num">59.1%</td><td class="num">738,807 (99.4%)</td></tr>
+  <tr><td>双平台 (wlw+ep)</td><td class="num">146,835</td><td class="num">11.7%</td><td class="num">—</td></tr>
+</table>
+<p class="footnote">* GMC Ready = has price + has title (≤150) + has description (≤5000) + has image. 不含 URL 和 availability.</p>
+<p class="footnote"><strong>europages 按公司注册国归属子域（2026-08-20 确认按域名单开账号）：</strong>第一期开 <strong>ep.fr ~124k / ep.es ~77k / ep.it ~51k</strong>（带价品，含双平台）；其余国家（de ~195k / co.uk ~69k / nl ~39k / pl ~33k / pt ~21k 等）≈ 490k 留后续阶段（见 4.2）。</p>
+
+<h3>2.2 GMC 7 个必填字段逐项检视</h3>
+<table>
+  <tr><th>#</th><th>GMC 字段</th><th>覆盖率</th><th>状态</th><th>说明</th></tr>
+  <tr><td>1</td><td><strong>id</strong></td><td class="num">100%</td><td><span class="badge green">✅</span></td><td>offer UUID，3,495,171 个全部有</td></tr>
+  <tr><td>2</td><td><strong>title</strong> (≤150)</td><td class="num">100% / 99.96%</td><td><span class="badge green">✅</span></td><td>avg 44 chars; 1,428 个 >150 需 truncate;<br>&lt;10 chars 仅 7,862 个 (0.62%)，建议设下限（见 2.5）</td></tr>
+  <tr><td>3</td><td><strong>description</strong> (≤5000)</td><td class="num">~100% / 99.8%</td><td><span class="badge green">✅</span></td><td>avg 823 chars; 6,249 个 >5000 需 truncate;<br>&lt;50 chars 仅 61,148 个 (4.9%)，建议设下限（见 2.5）</td></tr>
+  <tr><td>4</td><td><strong>link</strong></td><td class="num">100% 可构造</td><td><span class="badge green">✅</span></td><td>slug_id 100% 覆盖 → 构造 wlw.de 自有 PDP URL（详见 2.6）;<br>data_external_url (87.5%) 是商家独立站链接，<strong>不适用</strong>（自引流）</td></tr>
+  <tr><td>5</td><td><strong>image_link</strong></td><td class="num">99.8%</td><td><span class="badge green">✅</span></td><td>3,489,619 个有至少一张图片</td></tr>
+  <tr><td>6</td><td><strong>price</strong></td><td class="num">36.0%</td><td><span class="badge yellow">⚠️</span></td><td>17.1% 是区间价 (min≠max), 需决策</td></tr>
+  <tr><td>7</td><td><strong>availability</strong></td><td class="num">0%</td><td><span class="badge red">❌</span></td><td>无库存追踪; 建议全部 fallback in_stock</td></tr>
+</table>
+
+<h3>2.3 价格格式深度分析</h3>
+<table>
+  <tr><th>价格类型</th><th>数量</th><th>占带价品</th><th>GMC 赋值策略</th></tr>
+  <tr><td>price_min 唯一 (无 max)</td><td class="num">1,042,377</td><td class="num">82.9%</td><td>直接使用 price_min</td></tr>
+  <tr><td>price_min = price_max</td><td class="num">1,003</td><td class="num">0.08%</td><td>直接使用（无差异）</td></tr>
+  <tr><td>price_min ≠ price_max (区间价)</td><td class="num">214,637</td><td class="num">17.1%</td><td>推荐使用 price_min</td></tr>
+</table>
+
+<p><strong>区间价 gap 分布 (min≠max):</strong></p>
+<table>
+  <tr><th>价格比 (max/min)</th><th>数量</th><th>分别占比</th><th>建议</th></tr>
+  <tr><td>1-1.1x (微小差异)</td><td class="num">19,399</td><td class="num">9.0%</td><td>用 min <span class="badge green">✅</span></td></tr>
+  <tr><td>1.1-1.5x</td><td class="num">86,156</td><td class="num">40.1%</td><td>用 min <span class="badge green">✅</span></td></tr>
+  <tr><td>1.5-2x</td><td class="num">35,230</td><td class="num">16.4%</td><td>用 min <span class="badge yellow">⚠️ 建议审视</span></td></tr>
+  <tr><td>2-5x</td><td class="num">40,750</td><td class="num">19.0%</td><td>用 min <span class="badge yellow">⚠️ 需确认</span></td></tr>
+  <tr><td>5-10x</td><td class="num">12,333</td><td class="num">5.7%</td><td>用 min <span class="badge red">⚠️ 可能偏低</span></td></tr>
+  <tr><td>10x+</td><td class="num">20,769</td><td class="num">9.7%</td><td>用 min <span class="badge red">⚠️ 严重偏低</span></td></tr>
+  <tr><td><strong>合计</strong></td><td class="num"><strong>214,637</strong></td><td class="num">100%</td><td></td></tr>
+</table>
+
+<h3>2.4 货币分布</h3>
+<table>
+  <tr><th>货币</th><th>数量</th><th>占比</th></tr>
+  <tr><td>EUR</td><td class="num">1,117,314</td><td class="num">88.8%</td></tr>
+  <tr><td>GBP</td><td class="num">58,623</td><td class="num">4.7%</td></tr>
+  <tr><td>CHF</td><td class="num">26,006</td><td class="num">2.1%</td></tr>
+  <tr><td>PLN</td><td class="num">17,686</td><td class="num">1.4%</td></tr>
+  <tr><td>其他 (TRY/RON/CZK/HUF/DKK/SEK...)</td><td class="num">38,388</td><td class="num">3.0%</td></tr>
+</table>
+
+<!-- ==================== 2.5 数据质量验证 ==================== -->
+<h3>2.5 抽样验证与脏数据排查（2026-08-20）</h3>
+
+<p>随机抽样 30 条有价格 Offer 人工检查：<strong>数据整体真实可信</strong>，覆盖真实商品（如妇科检查床 £3,288、HECO 螺钉 €2.40、储料架 £925），供应商名称/价格/货币/外部 URL 相互匹配。但发现以下需在 feed 生成时清洗的异常：</p>
+
+<table>
+  <tr><th>异常类型</th><th>数量</th><th>占带价品</th><th>处理建议</th></tr>
+  <tr><td>TEST/QA/Visable 内部测试账号（TEST、Quality Assurance @ Visable Freelisting 等 23 家）</td><td class="num">~1,430</td><td class="num">0.11%</td><td><span class="badge red">排除</span> 按供应商名/内部账号黑名单过滤</td></tr>
+  <tr><td>价格 &lt; 1 货币单位（0.01~0.99，疑似占位/测试价）</td><td class="num">52,472</td><td class="num">4.2%</td><td><span class="badge yellow">建议排除</span>（EUR 46,627 为主）</td></tr>
+  <tr><td>价格 &gt; 1,000,000 EUR（含脏数据如 8,000,120,000）</td><td class="num">335 (EUR)</td><td class="num">0.03%</td><td><span class="badge yellow">设上限</span> 排除 &gt;1M EUR（HUF/TRL 等大面额货币按汇率换算后判断）</td></tr>
+  <tr><td>供应商名异常（尾部下划线如 JSB TRADING LTD_）</td><td class="num">少量</td><td class="num">&lt;0.01%</td><td><span class="badge yellow">建议排除</span></td></tr>
+</table>
+
+<p><strong>价格分位数（EUR 带价品，n=1,117,314）：</strong> P1=€0.18 · P5=€1 · P25=€7.89 · P50=€29.99 · P75=€169.40 · P95=€2,703 · P99=€20,000 · MAX=€8,000,120,000（脏数据）</p>
+
+<div class="card">
+  <h3>数据清洗规则（进入 feed 前）</h3>
+  <ol>
+    <li><strong>排除内部测试账号：</strong>供应商名匹配 TEST / QA / Quality Assurance / Visable（内部）/ 含尾随下划线</li>
+    <li><strong>排除极端价格：</strong>data_price_min &lt; 1 或 &gt; 1,000,000 EUR（其他货币按近似汇率折算）</li>
+    <li><strong>排除缺字段：</strong>title/description 为空、图片缺失、slug_id 缺失</li>
+    <li><strong>设 title / desc 下限（新增 2026-08-20）：</strong>GMC 无硬性下限（仅上限 150/5000），但从匹配质量出发：<code>title ≥ 10 chars</code>（全量 7,862 条 0.62% / wlw 2,718 条 0.48%）+ <code>desc ≥ 50 chars</code>（全量 61,148 条 4.9% / wlw 26,543 条 4.7%）。抽样确认短 title 多为真实型号商品（如 AKG K371、IC-A120E），非脏数据——不建议 title ≥ 20 / desc ≥ 100 的严格门槛（分别损失 6.5% / 12.9%，误伤真实商品）；Phase 4 对短 title 做「品牌+型号+品类」补全替代排除</li>
+    <li><strong>净可用带价品估计：</strong>~1,258,017 − 1,430 (测试) − 52,472 (&lt;1) − 335 (&gt;1M) ≈ <strong>~1,204k</strong>（建议以 &gt;=1 EUR 为门槛）；加 title/desc 下限后全量再减 ~60k，wlw MVP 侧减 ~29k（≈5%）</li>
+  </ol>
+</div>
+
+<!-- ==================== 2.6 link 字段专项验证 ==================== -->
+<h3>2.6 link 字段专项验证：自有 PDP URL 构造（2026-08-20）</h3>
+
+<div class="card">
+  <p><strong>结论：link 字段能力 = 100% 可构造，实测全部可访问。</strong>GMC link 必须是 wlw.de 自有 PDP URL（我们在给自己引流，而不是导流到商家独立站）。数据表里 87.5% 的 <code>data_external_url</code> 指向商家外部网站（如 <code>supplier-shop.com/product/xyz</code>），对 GMC 无意义；自有 PDP URL 通过 slug_id 构造，覆盖无死角。</p>
+
+  <h3>wlw.de PDP URL 真实模式（已从生产页面确认）</h3>
+  <pre>https://www.wlw.de/de/firma/{公司slug}-{公司slug_id}/produkte/{产品slug}-{产品slug_id}
+例: https://www.wlw.de/de/firma/mahr-gmbh-280744/produkte/weisslichtinterferometer-mit-ica-technologie-35874570</pre>
+
+  <table>
+    <tr><th>URL 要素</th><th>数据来源</th><th>覆盖率</th><th>说明</th></tr>
+    <tr><td>公司 slug_id</td><td>companies.companies.slug_id</td><td class="num">100%</td><td>如 280744（Mahr GmbH）</td></tr>
+    <tr><td>公司 slug</td><td>slugify(公司名)（小写/变音符转写/标点转连字符）</td><td class="num">11,840 家</td><td>如 Mahr GmbH → mahr-gmbh；<strong>容错：错误 slug + 正确 id 实测 HTTP 200</strong></td></tr>
+    <tr><td>产品 slug_id</td><td>supplier_offers.offers.slug_id</td><td class="num">100%（3,495,171 全覆盖）</td><td>如 35874570</td></tr>
+    <tr><td>产品 slug</td><td>supplier_offers.revisions.snapshot_slug（最新版）</td><td class="num">39%</td><td>缺失 61% → <strong>ARISE-1239 已修复</strong>（7/16 上线）：VCG 读路径 fallback 返回 slug_id，URL 降级为 <code>/produkte/{slug_id}</code></td></tr>
+  </table>
+
+  <h3>URL 可访问性实测（curl / WebFetch，2026-08-20）</h3>
+  <table>
+    <tr><th>URL 变体</th><th>状态</th><th>结论</th></tr>
+    <tr><td><code>/firma/mahr-gmbh-280744/produkte/weisslichtinterferometer-...-35874570</code>（带双 slug）</td><td><span class="badge green">HTTP 200</span></td><td>完整模式可用，页面含产品名/描述/价格/公司面包屑</td></tr>
+    <tr><td><code>/firma/mahr-gmbh-280744/produkte/35874570</code>（产品 slug 缺失 fallback）</td><td><span class="badge green">HTTP 200</span></td><td>ARISE-1239 fallback 生效，61% 无 slug 产品走此路径</td></tr>
+    <tr><td><code>/firma/maher-gmbh-280744/produkte/35874570</code>（错误公司 slug）</td><td><span class="badge green">HTTP 200</span></td><td>公司 slug 容错，slug_id 为权威标识，0 重定向</td></tr>
+    <tr><td><code>/firma/280744/produkte/35874570</code>（公司 slug 完全缺失）</td><td><span class="badge red">HTTP 404</span></td><td>公司段必须非空（任一 slug + 正确 id 即可）</td></tr>
+  </table>
+
+  <p><strong>europages 侧（第一期 3 个 EP 域名账号，见 4.1）：</strong><code>europages.ep_products.prd_url</code>（87.5% 覆盖）同样是商家外部站链接（如 ringoplast.de），不可直接使用；EP 自有 PDP URL 构造模式待技术确认（或复用 wlw 侧 slug_id 机制）。</p>
+</div>
+
+<!-- ==================== 2.7 线上对照验证 ==================== -->
+<h3>2.7 线上对照验证：PDP 页面不显示价格，但 JSON-LD 带价格（2026-08-20）</h3>
+
+<div class="card">
+  <p><strong>背景：</strong>线上随机抽查 PDP 页面看不到价格，引发对“带价品 1,258,017”数据真实性的质疑。经数据库 ↔ 线上逐条对照，<strong>数据完全真实一致</strong>，看不到价格是 wlw 页面设计所致：</p>
+
+  <table>
+    <tr><th>对照项</th><th>数据库 (Redshift)</th><th>线上页面 (wlw.de)</th><th>结论</th></tr>
+    <tr><td>PMT Glasabfälle（用户抽查）<br><code>/produkte/glasabfaelle-...-36354509</code></td><td>data_price_min = <strong>NULL</strong></td><td>页面无价格（UI 与 JSON-LD 均无）</td><td><span class="badge green">一致</span> 该产品属于 64% 无价格群体；随机抽查命中无价格概率 64%</td></tr>
+    <tr><td>JAKO Duschvorhangstange（随机有价品）<br><code>/produkte/38496079</code></td><td>data_price_min = <strong>119 EUR</strong></td><td>UI 不显示价格；<strong>JSON-LD Product schema 含 <code>offers.price=“119”, priceCurrency=“EUR”, availability=InStock, sku=38496079</code></strong></td><td><span class="badge green">一致</span> 价格 119 = 119，字段全部对账</td></tr>
+    <tr><td>Mahr Weißlichtinterferometer（Jira 工单样例）<br><code>/produkte/35874570</code></td><td>data_price_min = <strong>NULL</strong></td><td>页面无价格；无 JSON-LD offers（但 NUXT payload 保留 price 字段定义）</td><td><span class="badge green">一致</span></td></tr>
+  </table>
+
+  <p><strong>结论：</strong></p>
+  <ul>
+    <li><strong>数据层价格真实：</strong>36% 带价品占比成立（2.5 节已随机抽样 30 条验证）；随机线上找产品看不到价格是常态——64% 无价格 + 有价格也不在 UI 展示</li>
+    <li><strong>wlw PDP 页面不渲染价格（UI），但输出 JSON-LD 结构化价格：</strong>有价格品 → <code>Product.offers.price</code> 输出且与数据库一致；无价格品 → 不输出 offers。这是 SEO 结构化数据项目（biz-seo-sdk）的成果，对 GMC 是重大利好</li>
+    <li><strong>GMC 影响：</strong>① 落地页结构化价格与 feed 价格一致 → <strong>price mismatch disapproval 风险极低</strong>；② 落地页 availability 也输出 InStock，与 feed 统一 in_stock 方案吻合；③ ⚠️ 用户肉眼看不到价格，Shopping 点击后体验打折，可能影响转化（见风险清单）</li>
+    <li><strong>审核合规性结论（页面无价格/库存是否拒登）：</strong>分两层——① <strong>feed 层</strong>：price / availability 为必填，缺失则商品不收录（我们已提供，达标）；② <strong>落地页层</strong>：mismatch 仅在“页面显示的价格与 feed 不一致”时触发（页面不显示 → 不构成 mismatch）；<strong>但 Google 官方 Landing page requirements（4752265）明确要求 “clearly show the product price on the landing page”</strong>——PDP UI 不显示价格属于落地页展示要求的合规缺口，虽不构成 mismatch 拒登，但叠加询价制“不可直接购买”存在无法使用 GMC 的实质风险（详见 2.9）。本页面 JSON-LD 输出价格与 feed 一致，是爬虫验证层面的加分项，但<strong>不能替代 UI 展示</strong>。</li>
+  </ul>
+</div>
+
+<!-- ==================== 2.8 竞品调研 ==================== -->
+<h3>2.8 竞品调研：B2B 阶梯价在购物渠道的展示（2026-08-20）</h3>
+
+<div class="card">
+  <p><strong>背景：</strong>评估“区间价产品 feed 提交 min 还是 max”时，实际调研同类 B2B 平台（Made-in-China）在购物渠道的展示方式（Google Shopping 反爬 → Bing Shopping 实况 + 实站验证）。</p>
+
+  <table>
+    <tr><th>验证项</th><th>结果</th></tr>
+    <tr><td>Bing Shopping 搜索 “wholesale stainless steel tumbler”</td><td>Made-in-China 批发产品全部显示<strong>单个最低价</strong>：$0.97 / $1.78 / $2.80 / $3.04 / $3.13 / $3.33 / $3.64 / $3.76 / $4.18 / $5.07（均为阶梯价最低档），无一显示 max 或区间</td></tr>
+    <tr><td>Made-in-China 产品页（cnyihi.en.made-in-china.com 实站）</td><td>页面 UI 显示<strong>阶梯价表</strong>（US$3.14 / 2.86 / 2.72 / 2.57，MOQ 档最高、大批量最低——与 wlw 的 min/max 语义同构）；<strong>JSON-LD offers.price = “2.57”（= min）</strong>，availability=InStock</td></tr>
+    <tr><td>批量装商品（“20 Skinny Straight Sublimation Tumblers”）</td><td>显示 $84.00 = <strong>最小销售单位的打包总价</strong>（20 件装）→ Google “total price of the minimum purchasable quantity” 的真实语义：按最小销售单位（整箱/整套/20件装）提交打包总价；按件销售（MOQ=1 piece）提交单件价 = <strong>min</strong></td></tr>
+  </table>
+
+  <p><strong>结论：</strong>① B2B 平台行业通行做法 = feed 提交并展示 <strong>min（最低价）</strong>，且页面 JSON-LD 亦输出 min——feed 用 min 与落地页完全一致（零 mismatch）；② 用 max（MOQ 档单价）与行业实践相反，且与页面 JSON-LD 不一致 → 必然 mismatch；③ 落地页 UI 显示阶梯价表（含 min）是行业标配，min 必须对用户可见。</p>
+</div>
+
+<!-- ==================== 2.9 PDP 价格展示必要性 ==================== -->
+<h3>2.9 PDP 前端必须展示价格（官方 Landing Page Requirements，2026-08-20）</h3>
+
+<div class="card">
+  <p><strong>问题：</strong>wlw PDP UI 不渲染价格（仅 JSON-LD 输出），“把价格展示在 PDP”是可选优化还是硬性要求？</p>
+
+  <table>
+    <tr><th>来源</th><th>要点</th></tr>
+    <tr><td>Google Merchant Center Help<br><strong>About landing page requirements</strong>（官方文档 4752265）</td><td>“<strong>Clearly show the product price on the landing page. The price should be easy to view, and should match your product data. If your landing page has multiple prices, the price of the advertised product must be the most prominent.</strong>”<br>落地页<strong>必须</strong>清晰展示价格；多价格（如阶梯/区间）时，广告商品的价格必须<strong>最显眼</strong></td></tr>
+    <tr><td>Google Ads Community 官方论坛（107143830，Product Expert 推荐答案）</td><td>“if you do not have a price on the landing page and the user can't purchase the product directly through your site then you can't use Google Merchant Center”——落地页无价格 + 不可直接购买（询价制）→ <strong>不能使用 GMC</strong></td></tr>
+    <tr><td>price 属性定义（6324371）</td><td>“Submit an amount and currency that match the price on your landing page and the checkout pages”；变体价格场景：“different prices for each of these variants”（多规格多价可拆分为变体处理）</td></tr>
+  </table>
+
+  <p><strong>结论：</strong>① PDP <strong>必须展示价格</strong>——官方 Landing page requirements 的硬性要求（“clearly show”），非可选优化；② 展示的价格必须与 feed 一致 → PDP 应显示 <strong>min 作为主价格（最显眼）</strong>，或显示阶梯价表（min 最显眼），与 feed / JSON-LD 三方一致；③ wlw 是询价制（无直接购买），叠加“UI 无价格”双缺口 → 若 PDP 不显示价格，GMC 投放存在被拒/无法使用的实质风险（2.7 结论据此修正）；④ biz-seo-sdk JSON-LD 已输出 min，<strong>无需改动</strong>，仅需前端 UI 渲染。</p>
+  <p><strong>行动：</strong>新增前置依赖——PDP 前端展示价格（min 主价格或阶梯表），产品侧改动，R1 上线前完成。</p>
+</div>
+
+
+<!-- ==================== 3. 三大数据差距决策方案 ==================== -->
+<h2>3. 三大数据差距决策方案</h2>
+
+<div class="card">
+<h3>A) availability（库存状态）</h3>
+<p><strong>问题：</strong>wlw 是询价平台，无实时库存追踪。GMC 要求必填 in_stock / out_of_stock / preorder / backorder。</p>
+<p><strong>推荐方案：所有活跃 Offer 统一设为 <code>in_stock</code></strong></p>
+<ul>
+  <li>原理：published 且未 delete 的 offer 可视为"可销售/可询价"状态</li>
+  <li>影响：简单直接，无负面效果；如实际缺货用户发起询价后由商家回复</li>
+  <li>风险：极少数已停产但仍保留展示的商品可能不符合实际情况 → 可后续增加 supplier 标记的库存状态信号</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>B) price 格式（区间价处理）</h3>
+<p><strong>问题：</strong>数据库存储 price_min / price_max 区间，GMC 要求单一固定价格。</p>
+<p><strong>推荐方案：使用 price_min（行业实证 + 官方要求支撑）</strong></p>
+<ul>
+  <li>82.9% 有价格品只有 price_min（本身就是单值），无需额外处理</li>
+  <li>区间价中 49.1% 的 gap 在 1.5x 以内，use min 与实际价格偏差可控</li>
+  <li><strong>行业实证（2026-08-20，见 2.8）：</strong>Made-in-China 等 B2B 平台在购物渠道提交并展示<strong>最低价（min）</strong>，页面 JSON-LD 亦输出 min——feed 用 min 与落地页完全一致，零 mismatch 风险；用 max（MOQ 档单价）与行业实践相反且必然 mismatch</li>
+  <li><strong>官方落地页要求（见 2.9）：</strong>落地页必须清晰展示价格，且“广告商品的价格必须最显眼” → PDP 将展示 min 作为主价格（新增产品依赖）</li>
+  <li><strong>例外处理：</strong>gap > 10x 的 20,769 个 offer 建议 <strong>skip（不上传）</strong>——mean(price_min, price_max) 与页面 JSON-LD（min）不一致，会触发 mismatch</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>C) link（产品落地页 URL）</h3>
+<p><strong>问题：</strong>data_external_url 指向供应商外部网站（如 <code>https://supplier-shop.com/product/xyz</code>），GMC 要求 URL 是自有已验证域名的 PDP——<strong>我们要给自己引流，不导流商家站</strong>。</p>
+<p><strong>推荐方案：构造 wlw.de 自有 PDP URL（已实测验证，见 2.6）</strong></p>
+<p>wlw.de PDP URL 模式：<code>https://www.wlw.de/de/firma/{公司slug}-{公司slug_id}/produkte/{产品slug}-{产品slug_id}</code></p>
+<ul>
+  <li>三要素：公司 slug_id（companies.slug_id，100%）+ 公司 slug（slugify 公司名）+ 产品 slug_id（offers.slug_id，100%）</li>
+  <li><strong>产品 slug 缺失（61%）不阻塞：</strong>ARISE-1239（7/16 已上线）VCG 读路径 fallback 返回 slug_id，<code>/produkte/{slug_id}</code> 实测 HTTP 200</li>
+  <li><strong>公司 slug 容错：</strong>错误 slug + 正确 slug_id 实测 HTTP 200（slug_id 为权威标识）；公司段完全缺失才 404</li>
+  <li><strong>EP 侧：</strong>ep_products.prd_url 同为商家外部链接不可用；EP 自有 PDP URL 模式待技术确认——<strong>2026-08-20 确认按域名单开账号后，第一期 3 个 EP 账号（ep.it/es/fr）均依赖该模式</strong>；EP 域名按公司注册国归属子域（<strong>国家站模式，2026-08-20 确认</strong>）；EP 自有 PDP URL 构造模式仍待技术确认；确认后各 EP 账号在各自 GMC 账号完成域名验证（见 1. 前置依赖）</li>
+  <li><strong>⚠️ GMC 域名验证：</strong>wlw.de 需在 GMC 完成域名验证（UC-352 前置）</li>
+</ul>
+</div>
+
+<!-- ==================== 3. 实施范围 ==================== -->
+<h2>4. 实施范围</h2>
+
+<h3>4.1 第一期 Scope（4 个 GMC 账号，2026-08-20 按域名切分）</h3>
+<table>
+  <tr><th>GMC 账号（域名）</th><th>带价品</th><th>GMC Ready*</th><th>其中单值价（Phase 1 先传）</th><th>区间价（Phase 2）</th></tr>
+  <tr><td><strong>wlw.de</strong>（wlw=true 全部）</td><td class="num">568,945</td><td class="num">567,428</td><td class="num">477,828</td><td class="num">89,600</td></tr>
+  <tr><td><strong>europages.fr</strong>（法国公司品）</td><td class="num">117,962</td><td class="num">116,792</td><td class="num">105,186</td><td class="num">11,606</td></tr>
+  <tr><td><strong>europages.es</strong>（西班牙公司品）</td><td class="num">68,091</td><td class="num">67,842</td><td class="num">56,161</td><td class="num">11,681</td></tr>
+  <tr><td><strong>europages.it</strong>（意大利公司品）</td><td class="num">49,532</td><td class="num">49,481</td><td class="num">38,684</td><td class="num">10,797</td></tr>
+  <tr><td><strong>第一期合计</strong></td><td class="num"><strong>804,530</strong></td><td class="num"><strong>801,543</strong></td><td class="num"><strong>~678k</strong></td><td class="num"><strong>~124k</strong></td></tr>
+</table>
+<p class="footnote">* GMC Ready = has price + has title (≤150) + has description (≤5000) + has image（Redshift 2026-08-20）。EP 域名按公司注册国归属（<strong>国家站模式，2026-08-20 确认</strong>）；ep.fr/es/it 仅计非 wlw 品（双平台品已在 wlw.de 账号），4 账号间无重复。区间价 gap&gt;10x skip 后 ~110k。</p>
+
+<p><strong>第一期选品逻辑：</strong>4 个账号（域名）并行，各账号先传<strong>单值价</strong>品（Phase 1，~678k）→ 再传<strong>区间价</strong>品（Phase 2，~124k）。</p>
+
+<h3>4.2 发布阶段（按域名账号）</h3>
+<table>
+  <tr><th>阶段</th><th>Scope</th><th>预估量级</th></tr>
+  <tr><td>Phase 1（第一期 MVP）</td><td>4 账号各传<strong>单值价</strong>品：wlw.de ~478k + ep.fr ~105k + ep.es ~56k + ep.it ~39k <strong>（PDP 价格展示依赖上线后启动，见 2.9）</strong></td><td class="num">~678k</td></tr>
+  <tr><td>Phase 2（第一期内）</td><td>4 账号各传<strong>区间价</strong>品（price=min；gap&gt;10x skip）：wlw.de ~90k + ep.fr ~12k + ep.es ~12k + ep.it ~11k</td><td class="num">~124k（skip 后 ~110k）</td></tr>
+  <tr><td>Phase 3（后续）</td><td>其余 EP 国家域名开新账号（europages.de / .co.uk / .nl / .com 等）：DE ~195k + GB ~69k + TR ~40k + NL ~39k + PL ~33k + PT ~21k + 其他</td><td class="num">~490k</td></tr>
+  <tr><td>Phase 4（收尾）</td><td>长 title/desc 字段处理 + 短 title 补全（品牌+型号+品类）</td><td class="num">~28k</td></tr>
+  <tr><td><strong>全量总计</strong></td><td>（第一期 ~805k + Phase 3 ~490k + Phase 4 补全）≈ 覆盖全平台带价品</td><td class="num"><strong>~1,258k</strong></td></tr>
+</table>
+
+<!-- ==================== 4. 技术方案 ==================== -->
+<h2>5. 技术方案</h2>
+
+<h3>5.1 Feed 结构（按账号/域名分别出 feed）</h3>
+<pre>
+id            → offer.id (UUID)
+title         → data_name (truncate to 150 if needed)
+description   → data_description (plain text, truncate to 5000 if needed)
+link          → 按账号域名：
+                 # wlw.de 账号: https://www.wlw.de/de/firma/{company_slug}-{company_slug_id}/produkte/{product_slug}-{slug_id}
+                 #   产品 slug 缺失时 fallback: .../produkte/{slug_id} (ARISE-1239, 实测 200)
+                 # ep.it / ep.es / ep.fr 账号: EP 自有 PDP URL（模式待技术确认，见 3.C）
+image_link    → first image URL from supplier_offers.images
+price         → {data_price_min} {data_price_cur} (e.g. "49.99 EUR")
+                 # min = 行业实践（Made-in-China 等 B2B 提交最低价）+ 与页面 JSON-LD 一致
+                 # 区间价同样用 min；gap>10x skip（mean/average 会与页面不一致 → mismatch）
+availability  → in_stock (static)
+identifier_exists → false (无 brand/GTIN/MPN 时声明)
+</pre>
+
+<h3>5.2 数据处理 pipeline</h3>
+<div class="timeline">
+  <div class="timeline-item">
+    <div class="phase">Phase 1: 数据抽取</div>
+    <p>SQL from supplier_offers.offers + JOIN companies → 导出待上传商品清单</p>
+  </div>
+  <div class="timeline-item">
+    <div class="phase">Phase 2: 字段清洗</div>
+    <p>title/description truncation + price 单值化 + PDP URL 构造 + image 去首张</p>
+  </div>
+  <div class="timeline-item">
+    <div class="phase">Phase 3: Feed 生成</div>
+    <p>按 GMC 规范生成 XML 或 Google Sheets feed</p>
+  </div>
+  <div class="timeline-item">
+    <div class="phase">Phase 4: 上传 & 验证</div>
+    <p>GMC Dashboard / API 上传 → 等待审核 → 处理 Disapproval</p>
+  </div>
+  <div class="timeline-item">
+    <div class="phase">Phase 5: 增量更新</div>
+    <p>建立增量 feed 更新机制（新增/修改/下架）</p>
+  </div>
+</div>
+
+<h3>5.3 条件必填字段处理</h3>
+<table>
+  <tr><th>字段</th><th>状态</th><th>方案</th></tr>
+  <tr><td>brand</td><td><span class="badge yellow">待确认</span></td><td>offer 数据无品牌字段; 可声明 <code>identifier_exists=false</code></td></tr>
+  <tr><td>GTIN</td><td><span class="badge red">无</span></td><td>B2B 平台通常无 GTIN，声明 <code>identifier_exists=false</code></td></tr>
+  <tr><td>MPN</td><td><span class="badge red">无</span></td><td>同上</td></tr>
+  <tr><td>google_product_category</td><td><span class="badge yellow">可选</span></td><td>可映射 cpv_category_id → Google 分类; 非必填但推荐</td></tr>
+</table>
+
+<!-- ==================== 5. AB 增量测算 ==================== -->
+<h2>6. AB 增量测算</h2>
+
+<div class="card">
+<h3>目标：AB2 +5（推全）来源拆解</h3>
+<table>
+  <tr><th>指标</th><th>第一期（4 域名 ~805k）</th><th>推全（~1,258k）</th><th>来源</th></tr>
+  <tr><td>第一期 4 域名带价品（wlw.de + ep.it/es/fr）</td><td class="num">~805k</td><td class="num">~1,258k（1.56x）</td><td>Redshift query 2026-08-20</td></tr>
+  <tr><td>Google Shopping Organic CTR (估算)</td><td class="num">~0.5-1.5%</td><td class="num">~0.5-1.5%</td><td>行业 Benchmark (B2B 偏低)</td></tr>
+  <tr><td>日均 Shopping 点击 (估计)</td><td class="num">~4,000-12,100</td><td class="num">~6,300-18,900</td><td>带价品 × CTR</td></tr>
+  <tr><td>CVR → AB (参考均值)</td><td class="num">~2-4%</td><td class="num">~2-4%</td><td>SEO 渠道 CVR 基准</td></tr>
+  <tr><td>日均 AB (估计)</td><td class="num">~80-480</td><td class="num">~125-750</td><td></td></tr>
+  <tr><td>AB→AB2 CVR</td><td class="num">~1-3%</td><td class="num">~1-3%</td><td>SEO 渠道 AB→AB2 基准</td></tr>
+  <tr><td>日均 AB2 增量 (估计)</td><td class="num">~0.8-14</td><td class="num">~1.3-22.5</td><td>区间中值 ~5-7</td></tr>
+</table>
+<p><strong>目标：</strong>第一期 <strong>+3 AB2/日</strong>（区间中值），推全后 <strong>+5 AB2/日</strong>（中值合理偏上）——推全量 1,258k 为第一期的 1.56x，AB2 增量线性外推中值 ≈5.5；+5 兼顾长尾流量与审核波动，既非保守（不设 +1 下限）也不激进（不押上限 22）。上线后 4 周按实际数据调校。</p>
+</div>
+
+<!-- ==================== 7. DAB 计算 ==================== -->
+<h2>7. DAB Growth 预估</h2>
+
+<table>
+  <tr><th>指标</th><th>值</th><th>计算依据</th></tr>
+  <tr><td>第一期上传量（4 账号带价品）</td><td class="num">~805k</td></tr>
+  <tr><td>全量上传</td><td class="num">~1,258k</td></tr>
+  <tr><td>DAB 目标 (每个项目 ≥3)</td><td class="num">≥3 DAB</td><td>用户要求: 3+ DAB growth 否则 tech 延后</td></tr>
+  <tr><td>DAB = AB2 增量 / 项目周期(月)</td><td class="num">+5 AB2 / ~2 月 ≈ <strong>2.5 DAB</strong></td><td>推全目标 +5 AB2/日，按 2 个月建设期</td></tr>
+  <tr><td>结论</td><td><span class="badge yellow">2.5 DAB（接近 3 门槛）</span></td><td>推全后按 +5 AB2/日 绝对值考核（第一期 +3）；若建设期拉长至 2.5 个月则 ≈3 DAB</td></tr>
+</table>
+
+<!-- ==================== 8. 建议执行计划 ==================== -->
+<h2>8. 建议执行计划 & 时间线</h2>
+
+<table>
+  <tr><th>周次</th><th>行动</th><th>产出</th></tr>
+  <tr><td>W34 (8/17-23)</td>
+    <td>① 确认 4 个 GMC 账号开通（wlw.de + ep.it/es/fr，UC-351/352/362）<br>② 确认 4 域名验证状态<br>③ 确认 EP 自有 PDP URL 模式</td>
+    <td>前置依赖清单一页</td>
+  </tr>
+  <tr><td>W35 (8/24-30)</td>
+    <td>① Phase 1 feed 生成 & 上传（4 账号单值价品）<br>② 监控 GMC 审核状态<br>③ 处理 Feed Disapproval</td>
+    <td>4 账号 ~678k 单值价上线</td>
+  </tr>
+  <tr><td>W36-W37 (8/31-9/13)</td>
+    <td>① Phase 2 区间价上传（4 账号）<br>② 建立增量更新机制<br>③ Shop Ads 评估（可选）</td>
+    <td>区间价商品 + 增量 pipeline</td>
+  </tr>
+  <tr><td>W38-W40 (9/14-10/4)</td>
+    <td>① Phase 3 其余 EP 域名账号（de/co.uk/nl/com 等）<br>② 数据复盘（4 周后）<br>③ 效果调优</td>
+    <td>全量上线 + 效果报告</td>
+  </tr>
+</table>
+
+<!-- ==================== 9. 风险 ==================== -->
+<h2>9. 风险清单</h2>
+
+<table>
+  <tr><th>风险</th><th>影响</th><th>概率</th><th>缓解措施</th></tr>
+  <tr><td>GMC 账号/域名未验证</td><td>无法上传</td><td>中</td><td>优先确认 4 账号 + 4 域名验证状态（UC-351/352/362）；EP 自有 PDP URL 构造模式需技术确认（域名归属已按国家站模式确认）</td></tr>
+  <tr><td>区间价使用 min 触发 Disapproval</td><td>部分商品下架</td><td>低-中</td><td>gap>10x 的 2 万条 review 后决定 skip</td></tr>
+  <tr><td>PDP URL 落地页与价格不匹配</td><td>Disapproval</td><td>中</td><td>确保落地页展示的价格与 feed 一致</td></tr>
+  <tr><td>访问入口在中文国家但商品描述全是德文</td><td>低转化</td><td>低</td><td>德语占 57%，GMC 按 target country 投放</td></tr>
+  <tr><td>B2B 平台在 Shopping 中的表现</td><td>CTR 低于 C2C/B2C</td><td>高</td><td>Benchmark 已考虑 B2B 折扣; 目标已按中值上修（推全 +5，第一期 +3）</td></tr>
+  <tr><td>PDP 页面 UI 不显示价格（仅 JSON-LD 输出）</td><td>违反官方 Landing page requirements（“clearly show the product price”），叠加询价制“不可直接购买” → 存在无法使用 GMC / 商品被拒风险；且用户点击后看不到价格，转化打折</td><td>高</td><td><strong>新增依赖：PDP 展示 min 主价格</strong>（与 feed/JSON-LD 三方一致），R1 上线前完成；biz-seo-sdk 无需改</td></tr>
+  <tr><td>Harry 8 月底才接手新项目</td><td>进度延后</td><td>低</td><td>方案先行，数据准备工作同步进行</td></tr>
+</table>
+
+<!-- ==================== 10. 附录 ==================== -->
+<h2>10. 附录：SQL 数据口径</h2>
+
+<h3>核心取数 SQL</h3>
+<pre>
+-- 带价品 wlw.de GMC Ready（含 link 构造要素）
+SELECT so.id, so.data_name, so.data_description, 
+       so.data_price_min, so.data_price_cur,
+       so.slug_id AS product_slug_id,  -- 产品 slug_id（link 必需，100%）
+       cc.slug_id AS company_slug_id,  -- 公司 slug_id（link 必需，100%）
+       cc.name AS company_name,        -- 公司 slug = slugify(name)
+       r.snapshot_slug AS product_slug -- 产品 slug（39% 有；缺失时 link 用纯 slug_id）
+FROM supplier_offers.offers so
+JOIN companies.companies cc ON so.supplier_id = cc.supplier_facts_uuid
+LEFT JOIN (
+  SELECT offer_id, snapshot_slug,
+         ROW_NUMBER() OVER (PARTITION BY offer_id ORDER BY update_time DESC) rn
+  FROM supplier_offers.revisions
+) r ON r.offer_id = so.id AND r.rn = 1
+WHERE so.delete_time IS NULL 
+  AND so.publish_time IS NOT NULL
+  AND so.data_price_min IS NOT NULL AND so.data_price_min > 0
+  AND cc.platform_wlw = true
+  AND so.data_name IS NOT NULL AND LENGTH(so.data_name) <= 150
+  AND so.data_description IS NOT NULL AND LENGTH(so.data_description) <= 5000
+  AND EXISTS (SELECT 1 FROM supplier_offers.images si 
+              WHERE si.offer_data_images = so.id)
+  AND (so.data_price_max IS NULL OR so.data_price_min = so.data_price_max)
+  AND so.data_price_cur = 'EUR';
+-- → ~389k (仅 EUR + 单值价格, 用于 MVP)
+-- 如果放宽非 EUR + 单值价格 → ~478k（第一期 wlw.de 单值价全货币）
+-- link 构造: https://www.wlw.de/de/firma/{slugify(company_name)}-{company_slug_id}
+--           /produkte/{product_slug}-{product_slug_id}  (有 slug)
+--           /produkte/{product_slug_id}                 (无 slug, ARISE-1239 fallback, 实测 200)
+</pre>
+
+<h3>第一期 4 域名分布 SQL（2026-08-20）</h3>
+<pre>
+-- 按域名账号切分（wlw=true 全部归 wlw.de；EP 按公司注册国归 ep.XX；ep 仅计非 wlw 品避免重复）
+SELECT CASE WHEN cc.platform_wlw THEN 'wlw.de'
+            WHEN cc.country = 'FR' THEN 'ep.fr'
+            WHEN cc.country = 'ES' THEN 'ep.es'
+            WHEN cc.country = 'IT' THEN 'ep.it' END AS domain,
+       so.data_price_kind, COUNT(*) AS n
+FROM supplier_offers.offers so
+JOIN companies.companies cc ON so.supplier_id = cc.supplier_facts_uuid
+WHERE so.delete_time IS NULL AND so.publish_time IS NOT NULL
+  AND so.data_price_min IS NOT NULL AND so.data_price_min > 0
+  AND (cc.platform_wlw OR (cc.platform_ep AND cc.country IN ('FR','ES','IT')))
+GROUP BY 1, 2;
+-- 第一期合计 804,530 带价品（单值 fixed+from ~678k + 区间 range ~124k，gap>10x skip 后 ~110k）
+</pre>
+
+<h3>数据验证 SQL 脚本</h3>
+<pre>
+-- 价格区间 gap 检查
+SELECT so.id, so.data_price_min, so.data_price_max, 
+       so.data_price_max / NULLIF(so.data_price_min, 0) AS price_ratio
+FROM supplier_offers.offers so
+WHERE so.delete_time IS NULL AND so.publish_time IS NOT NULL
+  AND so.data_price_min IS NOT NULL AND so.data_price_min > 0
+  AND so.data_price_max IS NOT NULL AND so.data_price_max > 0
+  AND so.data_price_min != so.data_price_max
+  AND so.data_price_max / NULLIF(so.data_price_min, 0) > 10;
+-- → 20,769 个 gap>10x 需 review
+</pre>
+
+<hr>
+<p class="footnote" style="text-align:center;margin-top:30px;">
+  数据来源: Redshift Production (2026-08-20) · Redash adhoc queries · 编制: Jolyne Zhang<br>
+  前置背景: Teams 私聊 (Jolyne-Anna, 7/23-8/7) · UC-387 Jira · UC-330 (Anna → Muke data request)
+</p>
+
+</body>
+</html>
