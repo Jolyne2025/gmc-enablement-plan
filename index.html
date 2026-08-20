@@ -46,7 +46,7 @@
   <strong>Reporter：</strong>Jolyne Zhang (原 Assignee: Anna Freddi → 移交) &nbsp;|&nbsp;
   <strong>优先级：</strong>P1 &nbsp;|&nbsp;
   <strong>Dependency Scope：</strong>External &nbsp;|&nbsp;
-  <strong>前置依赖：</strong><span class="dep">UC-351</span> <span class="dep">UC-352</span> <span class="dep">UC-362</span>
+  <strong>前置依赖：</strong><span class="dep"><a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a></span> <span class="dep"><a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a></span> <span class="dep"><a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a></span>
 </div>
 
 <!-- ==================== 1. 前置依赖与风险 ==================== -->
@@ -54,12 +54,12 @@
 
 <table>
   <tr><th>依赖</th><th>说明</th><th>状态</th></tr>
-  <tr><td>UC-351</td><td>GMC 账号开通 / 配置——<strong>按域名单开账号（2026-08-20 确认）：第一期 4 个账号 = wlw.de + europages.it / europages.es / europages.fr</strong></td><td><span class="badge yellow">待确认</span></td></tr>
-  <tr><td>UC-352</td><td>GMC 域名验证——第一期 4 域名（wlw.de + europages.it + europages.es + europages.fr），各账号验证各自域名</td><td><span class="badge yellow">待确认</span></td></tr>
-  <tr><td>UC-362</td><td>GMC Feed 配置基础建设</td><td><span class="badge yellow">待确认</span></td></tr>
+  <tr><td><a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a></td><td>GMC 账号开通 / 配置——<strong>按域名单开账号（2026-08-20 确认）：第一期 4 个账号 = wlw.de + europages.it / europages.es / europages.fr</strong></td><td><span class="badge yellow">待确认</span></td></tr>
+  <tr><td><a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a></td><td><strong>GMC 域名验证（含 EP 域名验证，2026-08-20 合并）</strong>——第一期 4 域名（wlw.de + europages.it + europages.es + europages.fr），各账号验证各自域名；GMC 要求 feed 中 <code>link</code> 指向的域名必须在<strong>该域名自己的账号</strong>内完成“验证 + 声明”（verify and claim website）：每个 EP 域名开独立账号、各自验证各自域名；EP 域名按公司注册国归属（<strong>国家站模式，2026-08-20 确认；ep.fr=法国公司品 ~124k / ep.es=西班牙 ~77k / ep.it=意大利 ~51k，量级见 4.1</strong>）；未验证 → link 报 mismatched domain、商品不收录。链路：先确认 EP 自有 PDP URL 模式（见 3.C）→ 各账号完成域名验证 → 各域名品即可上传；其余 EP 国家域名（de ~195k / co.uk ~69k / nl ~39k 等 ≈ 490k）后续阶段再开账号</td><td><span class="badge yellow">待确认</span></td></tr>
+  <tr><td><a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a></td><td>GMC Feed 配置基础建设</td><td><span class="badge yellow">待确认</span></td></tr>
   <tr><td>PDP URL 构造</td><td>wlw.de 侧 slug_id → URL 映射 <strong>已验证</strong>（2026-08-20 实测 200）</td><td><span class="badge green">✅ 已验证</span></td></tr>
   <tr><td>PDP 前端展示价格</td><td>官方 Landing page requirements 硬性要求（4752265 “clearly show the product price”）；PDP UI 显示 <strong>min 主价格</strong>（或阶梯表，min 最显眼），与 feed/JSON-LD 一致；biz-seo-sdk JSON-LD 已输出 min 无需改，仅 UI 渲染</td><td><span class="badge red">新增依赖</span> 产品侧</td></tr>
-  <tr><td><strong>EP 域名验证（第一期：europages.it / europages.es / europages.fr）</strong></td><td><strong>必需（2026-08-20 确认：确实要上传 europages 商品，且按域名单开账号）</strong>——GMC 要求 feed 中 <code>link</code> 指向的域名必须在<strong>该域名自己的账号</strong>内完成“验证 + 声明”（verify and claim website）：每个 EP 域名开独立账号、各自验证各自域名；EP 域名按公司注册国归属（<strong>国家站模式，2026-08-20 确认；ep.fr=法国公司品 ~124k / ep.es=西班牙 ~77k / ep.it=意大利 ~51k，量级见 4.1</strong>）；未验证 → link 报 mismatched domain、商品不收录。链路：先确认 EP 自有 PDP URL 模式（见 3.C）→ 各账号完成域名验证 → 各域名品即可上传；其余 EP 国家域名（de ~195k / co.uk ~69k / nl ~39k 等 ≈ 490k）后续阶段再开账号</td><td><span class="badge red">必需</span> 第一期前置</td></tr>
+  <tr><td><strong>EP 域名验证（第一期：europages.it / europages.es / europages.fr）</strong></td><td><strong>已并入 <a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a></strong>（GMC 域名验证，2026-08-20）——EP 各域名在各自账号内完成“验证 + 声明”，链路与量级见 UC-352 行</td><td><span class="badge green">✅ 已合并</span></td></tr>
   <tr><td>Feed 更新机制</td><td>增量更新 / 全量刷新的方案设计</td><td><span class="badge yellow">需技术设计</span></td></tr>
 </table>
 
@@ -275,7 +275,7 @@
   <li><strong>产品 slug 缺失（61%）不阻塞：</strong>ARISE-1239（7/16 已上线）VCG 读路径 fallback 返回 slug_id，<code>/produkte/{slug_id}</code> 实测 HTTP 200</li>
   <li><strong>公司 slug 容错：</strong>错误 slug + 正确 slug_id 实测 HTTP 200（slug_id 为权威标识）；公司段完全缺失才 404</li>
   <li><strong>EP 侧：</strong>ep_products.prd_url 同为商家外部链接不可用；EP 自有 PDP URL 模式待技术确认——<strong>2026-08-20 确认按域名单开账号后，第一期 3 个 EP 账号（ep.it/es/fr）均依赖该模式</strong>；EP 域名按公司注册国归属子域（<strong>国家站模式，2026-08-20 确认</strong>）；EP 自有 PDP URL 构造模式仍待技术确认；确认后各 EP 账号在各自 GMC 账号完成域名验证（见 1. 前置依赖）</li>
-  <li><strong>⚠️ GMC 域名验证：</strong>wlw.de 需在 GMC 完成域名验证（UC-352 前置）</li>
+  <li><strong>⚠️ GMC 域名验证：</strong>wlw.de 需在 GMC 完成域名验证（<a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a> 前置）</li>
 </ul>
 </div>
 
@@ -396,7 +396,7 @@ identifier_exists → false (无 brand/GTIN/MPN 时声明)
 <table>
   <tr><th>周次</th><th>行动</th><th>产出</th></tr>
   <tr><td>W34 (8/17-23)</td>
-    <td>① 确认 4 个 GMC 账号开通（wlw.de + ep.it/es/fr，UC-351/352/362）<br>② 确认 4 域名验证状态<br>③ 确认 EP 自有 PDP URL 模式</td>
+    <td>① 确认 4 个 GMC 账号开通（wlw.de + ep.it/es/fr，<a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a>/<a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a>/<a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a>）<br>② 确认 4 域名验证状态<br>③ 确认 EP 自有 PDP URL 模式</td>
     <td>前置依赖清单一页</td>
   </tr>
   <tr><td>W35 (8/24-30)</td>
@@ -418,7 +418,7 @@ identifier_exists → false (无 brand/GTIN/MPN 时声明)
 
 <table>
   <tr><th>风险</th><th>影响</th><th>概率</th><th>缓解措施</th></tr>
-  <tr><td>GMC 账号/域名未验证</td><td>无法上传</td><td>中</td><td>优先确认 4 账号 + 4 域名验证状态（UC-351/352/362）；EP 自有 PDP URL 构造模式需技术确认（域名归属已按国家站模式确认）</td></tr>
+  <tr><td>GMC 账号/域名未验证</td><td>无法上传</td><td>中</td><td>优先确认 4 账号 + 4 域名验证状态（<a href="https://visable.atlassian.net/browse/UC-351" target="_blank">UC-351</a>/<a href="https://visable.atlassian.net/browse/UC-352" target="_blank">UC-352</a>/<a href="https://visable.atlassian.net/browse/UC-362" target="_blank">UC-362</a>）；EP 自有 PDP URL 构造模式需技术确认（域名归属已按国家站模式确认）</td></tr>
   <tr><td>区间价使用 min 触发 Disapproval</td><td>部分商品下架</td><td>低-中</td><td>gap>10x 的 2 万条 review 后决定 skip</td></tr>
   <tr><td>PDP URL 落地页与价格不匹配</td><td>Disapproval</td><td>中</td><td>确保落地页展示的价格与 feed 一致</td></tr>
   <tr><td>库存状态与 feed 不一致（缺货品场景）</td><td>页面显示与实际库存矛盾 → Inaccurate availability 违规（9773127）/ 用户点击后无法购买体验差</td><td>低（本期全量 in_stock + UI 不显示库存）</td><td>本期静态 in_stock 方案无需处理；未来缺货品上线前先定库存同步机制：feed + JSON-LD + UI 三方一致，out of stock 须置灰购买/询价按钮（2026-03 新要求）</td></tr>
