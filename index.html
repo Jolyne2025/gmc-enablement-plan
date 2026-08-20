@@ -370,8 +370,58 @@ identifier_exists → false (declare when no brand/GTIN/MPN)
   <tr><td>google_product_category</td><td><span class="badge yellow">Optional</span></td><td>Can map cpv_category_id → Google category; not required but recommended</td></tr>
 </table>
 
-<!-- ==================== 6. AB Increment Estimate ==================== -->
-<h2>6. AB Increment Estimate</h2>
+<!-- ==================== 6. Data Requirements: Tracking & Attribution ==================== -->
+<h2>6. Data Requirements: Frontend Tracking &amp; Attribution</h2>
+
+<div class="card">
+<h3>6.1 Attribution goal &amp; funnel</h3>
+<p><strong>North star:</strong> daily AB2 increment from the Shopping Organic channel (Phase 1 <strong>+3 AB2/day</strong>, full rollout <strong>+5 AB2/day</strong>, estimate in Ch. 7). To measure it, the funnel below must be traceable end to end:</p>
+<table>
+  <tr><th>Stage</th><th>Definition</th><th>Data source</th></tr>
+  <tr><td>Free-listing click</td><td>Google Shopping free listing impression → click on our PDP link</td><td>GMC / Search Console (impressions / clicks / CTR)</td></tr>
+  <tr><td>PDP visit (UV)</td><td>Session landing on wlw.de / europages.XX, attributed to Organic Shopping</td><td><code>metrics_layer.ga_user_metrics</code> (GA4 → warehouse)</td></tr>
+  <tr><td>Inquiry (AB)</td><td>QDR/RFQ created by the visitor (inquiry created date)</td><td><code>active_buyers</code> (backend table)</td></tr>
+  <tr><td>Buyer reply (AB2)</td><td>Buyer's first reply (first_reply_from_buyer_at), AB2 ⊆ AB</td><td><code>active_buyers</code> (backend table)</td></tr>
+</table>
+<p class="footnote">AB/AB2 come from backend business tables keyed by inquiry/reply dates — they do NOT depend on frontend tracking. Frontend tracking only affects UV and channel attribution.</p>
+</div>
+
+<div class="card">
+<h3>6.2 Frontend tracking: current state &amp; the one gap</h3>
+<p><strong>Already in place (zero new frontend dev):</strong> ① GA4 full-site tracking already covers PDP pages (page_view events land in <code>ext_google_analytics</code> in Redshift); ② inquiry events (QDR/RFQ) are recorded by the backend into <code>active_buyers</code>; ③ JSON-LD (biz-seo-sdk) already outputs offers/price/availability.</p>
+<p><strong>The one gap — Google Free Listings clicks are reported as <code>google / organic</code> in GA4 by default, indistinguishable from SEO organic search.</strong> GA4 only separates them when the Merchant Center auto-tag is on or the landing link carries UTM:</p>
+<table>
+  <tr><th>Option</th><th>How</th><th>Result in GA4</th><th>Notes</th></tr>
+  <tr><td><strong>A. GMC auto-tag (recommended)</strong></td><td>Per GMC account: Settings → Conversion Settings → enable organic shopping auto-tagging + link the GA4 property</td><td>Default Channel Grouping = <strong>“Organic Shopping”</strong>; Source Platform = “Shopping Free Listings”; Campaign = “Shopping Free Listings” (source/medium stay google/organic)</td><td>Zero feed/URL change; Organic Shopping is already a GA4 default channel group (official <a href="https://support.google.com/analytics/answer/9756891" target="_blank">9756891</a>); auto-tag setup: <a href="https://playhouse.digital/blog/autotag-google-shopping-organic-free-listings-to-track-performance-in-ga4" target="_blank">GMC auto-tag walkthrough</a></td></tr>
+  <tr><td>B. UTM params in feed link (fallback)</td><td>Append <code>?utm_source=google&amp;utm_medium=shopping&amp;utm_campaign=uc387_{account}_{phase}</code> to the feed <code>link</code></td><td>GA4 attributes session source=google, medium=shopping → same “Organic Shopping” channel; per-phase/per-domain granularity</td><td>Feed generation must add the suffix; UTM overrides auto-tag — pick ONE of A/B; params don't change landing-page content, so GMC price/availability checks are unaffected (still verify on a small sample)</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>6.3 Attribution methodology (company-standard, ratified 2026-08-18)</h3>
+<table>
+  <tr><th>Metric</th><th>Definition</th><th>Key constraints</th></tr>
+  <tr><td>UV (Organic Shopping)</td><td><code>metrics_layer.ga_user_metrics</code>, COUNT(DISTINCT visitor_sk) per day, channel = “Organic Shopping”</td><td>channel = session attribution (GA last non-direct click + gclid override) — NOT summable across channels; <code>first_channel_per_day</code> is summable; confirm the warehouse pipeline passes the GA4 session channel through</td></tr>
+  <tr><td>AB</td><td><code>active_buyers</code>, COUNT(DISTINCT buyer_id) WHERE is_ab2=false AND request_origin IN ('web','app') AND channel=Organic Shopping, by inquiry created date (QDR+RFQ)</td><td>Quality filter: is_quality + created_at &gt;= 2024-11-01; RFQ excludes converted_from_qdr; requires the channel mapping layer to add organic_shopping</td></tr>
+  <tr><td>AB2</td><td><code>active_buyers</code>, is_ab2=true, by first_reply_from_buyer_at (AB2 ⊆ AB)</td><td>AB2 rows have ~65% NULL conversion_page → join back to the original AB row (Path A: same request_type JOIN; Path B: QDR→RFQ via fact_request_for_quotes.direct_request_id)</td></tr>
+  <tr><td>conversion_page</td><td>serp→CSERP / products→PDP / company_profile→CPP / showroom→Showroom / mobile|null|other→Other</td><td>Shopping clicks land directly on PDP → expect PDP share to dominate; verifies landing quality</td></tr>
+  <tr><td>Freshness</td><td>T-3 (pipeline backfill ~3 days)</td><td>AB→AB2 conversion measured on weekly/monthly windows to avoid single-day reply-lag distortion</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>6.4 Data requirements checklist</h3>
+<table>
+  <tr><th>#</th><th>Requirement</th><th>Owner</th><th>Status</th></tr>
+  <tr><td>1</td><td>Enable organic shopping auto-tag in all 4 GMC accounts + link the GA4 property (option A)</td><td>GMC account config (UC-351 execution)</td><td><span class="badge yellow">To do — W34/W35</span></td></tr>
+  <tr><td>2</td><td>Confirm/extend warehouse channel mapping to include organic_shopping (ga_user_metrics + active_buyers attribution)</td><td>Data team (dbt)</td><td><span class="badge yellow">Confirm before R1</span></td></tr>
+  <tr><td>3</td><td>(Fallback) append UTM to feed link (option B)</td><td>Feed generation</td><td><span class="badge yellow">Optional</span></td></tr>
+  <tr><td>4</td><td>Weekly funnel dashboard: Shopping UV → AB → AB2 (T-3), by account/domain</td><td>This plan</td><td><span class="badge yellow">To build</span></td></tr>
+</table>
+</div>
+
+<!-- ==================== 7. AB Increment Estimate ==================== -->
+<h2>7. AB Increment Estimate</h2>
 
 <div class="card">
 <h3>Target: AB2 +5 (full rollout) breakdown</h3>
@@ -388,8 +438,8 @@ identifier_exists → false (declare when no brand/GTIN/MPN)
 <p><strong>Target:</strong> Phase 1 <strong>+3 AB2/day</strong> (mid-range), full rollout <strong>+5 AB2/day</strong> (slightly above mid-range) — full-rollout volume 1,258k is 1.56x Phase 1, linear extrapolation of AB2 increment mid-range ≈5.5; +5 balances long-tail traffic and review volatility, neither conservative (no +1 floor) nor aggressive (not betting on the 22 ceiling). Tune against actual data 4 weeks after launch.</p>
 </div>
 
-<!-- ==================== 7. Recommended Execution Plan ==================== -->
-<h2>7. Recommended Execution Plan &amp; Timeline</h2>
+<!-- ==================== 8. Recommended Execution Plan ==================== -->
+<h2>8. Recommended Execution Plan &amp; Timeline</h2>
 
 <table>
   <tr><th>Week</th><th>Actions</th><th>Deliverable</th></tr>
@@ -411,8 +461,8 @@ identifier_exists → false (declare when no brand/GTIN/MPN)
   </tr>
 </table>
 
-<!-- ==================== 8. Risk Register ==================== -->
-<h2>8. Risk Register</h2>
+<!-- ==================== 9. Risk Register ==================== -->
+<h2>9. Risk Register</h2>
 
 <table>
   <tr><th>Risk</th><th>Impact</th><th>Probability</th><th>Mitigation</th></tr>
@@ -427,8 +477,8 @@ identifier_exists → false (declare when no brand/GTIN/MPN)
   <tr><td>Harry only takes over the new project at end of August</td><td>Schedule delay</td><td>Low</td><td>Plan first; data preparation in parallel</td></tr>
 </table>
 
-<!-- ==================== 9. Appendix ==================== -->
-<h2>9. Appendix: SQL Data Sources</h2>
+<!-- ==================== 10. Appendix ==================== -->
+<h2>10. Appendix: SQL Data Sources</h2>
 
 <h3>Core extraction SQL</h3>
 <pre>
@@ -826,8 +876,58 @@ identifier_exists → false (无 brand/GTIN/MPN 时声明)
   <tr><td>google_product_category</td><td><span class="badge yellow">可选</span></td><td>可映射 cpv_category_id → Google 分类; 非必填但推荐</td></tr>
 </table>
 
-<!-- ==================== 6. AB 增量测算 ==================== -->
-<h2>6. AB 增量测算</h2>
+<!-- ==================== 6. 数据需求：前端埋点与归因口径 ==================== -->
+<h2>6. 数据需求：前端埋点与归因口径</h2>
+
+<div class="card">
+<h3>6.1 归因目标与漏斗</h3>
+<p><strong>北极星指标：</strong>Shopping Organic 渠道的日均 AB2 增量（第一期 <strong>+3 AB2/日</strong>、推全 <strong>+5 AB2/日</strong>，预估见第 7 章）。为度量该增量，以下漏斗必须端到端可追溯：</p>
+<table>
+  <tr><th>环节</th><th>定义</th><th>数据来源</th></tr>
+  <tr><td>免费列表点击</td><td>Google Shopping 免费列表展示 → 点击我们 PDP 链接</td><td>GMC / Search Console（展示/点击/CTR）</td></tr>
+  <tr><td>PDP 访问（UV）</td><td>落地 wlw.de / europages.XX 的会话，归因到 Organic Shopping</td><td><code>metrics_layer.ga_user_metrics</code>（GA4 入仓）</td></tr>
+  <tr><td>询盘（AB）</td><td>访客创建 QDR/RFQ（按 inquiry 创建日）</td><td><code>active_buyers</code>（后端表）</td></tr>
+  <tr><td>买家回复（AB2）</td><td>买家首次回复（first_reply_from_buyer_at），AB2 ⊆ AB</td><td><code>active_buyers</code>（后端表）</td></tr>
+</table>
+<p class="footnote">AB/AB2 来自后端业务表（按询盘/回复日），不依赖前端埋点；前端埋点只影响 UV 与渠道归因。</p>
+</div>
+
+<div class="card">
+<h3>6.2 前端埋点：现状与唯一缺口</h3>
+<p><strong>已具备（零新增前端开发）：</strong>① GA4 全站埋点已覆盖 PDP（page_view 事件入 Redshift <code>ext_google_analytics</code>）；② 询盘事件（QDR/RFQ）由后端写入 <code>active_buyers</code>；③ JSON-LD（biz-seo-sdk）已输出 offers/price/availability。</p>
+<p><strong>唯一缺口——Google Free Listings 点击在 GA4 中默认报为 <code>google / organic</code>，与 SEO 自然搜索无法区分。</strong>只有开启 Merchant Center 自动标记或落地链接带 UTM 时，GA4 才会将其分离：</p>
+<table>
+  <tr><th>方案</th><th>做法</th><th>GA4 中的效果</th><th>说明</th></tr>
+  <tr><td><strong>A. GMC 自动标记（推荐）</strong></td><td>每个 GMC 账号：设置 → 转化设置 → 开启 organic shopping 自动标记 + 关联 GA4 property</td><td>Default Channel Grouping = <strong>“Organic Shopping”</strong>；Source Platform = “Shopping Free Listings”；Campaign = “Shopping Free Listings”（source/medium 仍为 google/organic）</td><td>feed/URL 零改动；Organic Shopping 已是 GA4 默认渠道分组（官方 <a href="https://support.google.com/analytics/answer/9756891" target="_blank">9756891</a>）；自动标记配置参考：<a href="https://playhouse.digital/blog/autotag-google-shopping-organic-free-listings-to-track-performance-in-ga4" target="_blank">GMC auto-tag 配置说明</a></td></tr>
+  <tr><td>B. feed link 带 UTM（备选）</td><td>feed 的 <code>link</code> 追加 <code>?utm_source=google&amp;utm_medium=shopping&amp;utm_campaign=uc387_{账号}_{阶段}</code></td><td>GA4 记 session source=google、medium=shopping → 同样归入 “Organic Shopping”；可按阶段/域名细分</td><td>feed 生成侧需拼接参数；UTM 优先于自动标记——A/B 二选一；参数不改变落地页内容，不影响 GMC 价格/可用性校验（仍建议小样本验证）</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>6.3 归因口径（沿用公司定案，2026-08-18）</h3>
+<table>
+  <tr><th>指标</th><th>定义</th><th>关键约束</th></tr>
+  <tr><td>UV（Organic Shopping）</td><td><code>metrics_layer.ga_user_metrics</code>，COUNT(DISTINCT visitor_sk) 按日，channel = “Organic Shopping”</td><td>channel = session 归因（GA last non-direct click + gclid 覆盖）——跨渠道不可加总；<code>first_channel_per_day</code> 可加总；需确认数仓链路透传 GA4 session channel</td></tr>
+  <tr><td>AB</td><td><code>active_buyers</code>，COUNT(DISTINCT buyer_id) WHERE is_ab2=false AND request_origin IN ('web','app') AND channel=Organic Shopping，按 inquiry 创建日（QDR+RFQ）</td><td>质量过滤 is_quality + created_at &gt;= 2024-11-01；RFQ 排除 converted_from_qdr；需渠道映射层新增 organic_shopping</td></tr>
+  <tr><td>AB2</td><td><code>active_buyers</code>，is_ab2=true，按 first_reply_from_buyer_at（AB2 ⊆ AB）</td><td>AB2 行 conversion_page 约 65% 为 NULL → 回连原始 AB 行（Path A：同 request_type JOIN；Path B：QDR→RFQ 经 fact_request_for_quotes.direct_request_id）</td></tr>
+  <tr><td>conversion_page</td><td>serp→CSERP / products→PDP / company_profile→CPP / showroom→Showroom / mobile|null|其他→Other</td><td>Shopping 点击直接落 PDP → 预计 PDP 占比高；用于验证落地质量</td></tr>
+  <tr><td>数据时效</td><td>T-3（管道回填约 3 天）</td><td>AB→AB2 转化率按周/月窗口看，避免单日回复滞后失真</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>6.4 数据需求清单</h3>
+<table>
+  <tr><th>#</th><th>需求项</th><th>归属方</th><th>状态</th></tr>
+  <tr><td>1</td><td>4 个 GMC 账号各开启 organic shopping 自动标记 + 关联 GA4 property（方案 A）</td><td>GMC 账号配置（UC-351 执行方）</td><td><span class="badge yellow">待办 — W34/W35</span></td></tr>
+  <tr><td>2</td><td>确认/扩展数仓渠道映射含 organic_shopping（ga_user_metrics + active_buyers 归因）</td><td>数据团队（dbt）</td><td><span class="badge yellow">R1 前确认</span></td></tr>
+  <tr><td>3</td><td>（备选）feed link 追加 UTM（方案 B）</td><td>Feed 生成侧</td><td><span class="badge yellow">备选</span></td></tr>
+  <tr><td>4</td><td>周度漏斗看板：Shopping UV → AB → AB2（T-3），按账号/域名</td><td>本方案</td><td><span class="badge yellow">待建</span></td></tr>
+</table>
+</div>
+
+<!-- ==================== 7. AB 增量测算 ==================== -->
+<h2>7. AB 增量测算</h2>
 
 <div class="card">
 <h3>目标：AB2 +5（推全）来源拆解</h3>
@@ -844,8 +944,8 @@ identifier_exists → false (无 brand/GTIN/MPN 时声明)
 <p><strong>目标：</strong>第一期 <strong>+3 AB2/日</strong>（区间中值），推全后 <strong>+5 AB2/日</strong>（中值合理偏上）——推全量 1,258k 为第一期的 1.56x，AB2 增量线性外推中值 ≈5.5；+5 兼顾长尾流量与审核波动，既非保守（不设 +1 下限）也不激进（不押上限 22）。上线后 4 周按实际数据调校。</p>
 </div>
 
-<!-- ==================== 7. 建议执行计划 ==================== -->
-<h2>7. 建议执行计划 & 时间线</h2>
+<!-- ==================== 8. 建议执行计划 ==================== -->
+<h2>8. 建议执行计划 & 时间线</h2>
 
 <table>
   <tr><th>周次</th><th>行动</th><th>产出</th></tr>
@@ -867,8 +967,8 @@ identifier_exists → false (无 brand/GTIN/MPN 时声明)
   </tr>
 </table>
 
-<!-- ==================== 8. 风险 ==================== -->
-<h2>8. 风险清单</h2>
+<!-- ==================== 9. 风险 ==================== -->
+<h2>9. 风险清单</h2>
 
 <table>
   <tr><th>风险</th><th>影响</th><th>概率</th><th>缓解措施</th></tr>
@@ -883,8 +983,8 @@ identifier_exists → false (无 brand/GTIN/MPN 时声明)
   <tr><td>Harry 8 月底才接手新项目</td><td>进度延后</td><td>低</td><td>方案先行，数据准备工作同步进行</td></tr>
 </table>
 
-<!-- ==================== 9. 附录 ==================== -->
-<h2>9. 附录：SQL 数据口径</h2>
+<!-- ==================== 10. 附录 ==================== -->
+<h2>10. 附录：SQL 数据口径</h2>
 
 <h3>核心取数 SQL</h3>
 <pre>
